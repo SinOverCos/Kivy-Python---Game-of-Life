@@ -1,0 +1,9 @@
+## Copied from Simon Marquis
+## Name : req to live : req to come alive
+Conway:23:3
+Maze:3:12345
+Wavy:3:45678
+Blob:3567:5678
+Crystallization:3:012345678
+Static:1:1
+Castle Walls:45678:2345

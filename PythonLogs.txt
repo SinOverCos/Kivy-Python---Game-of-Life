@@ -1,0 +1,22 @@
+installed: kivy, python-pip, python-dev, NOT build-essential (can't figure out how), zlib1g-dev, git-core, cython, openjdk-7-jdk
+
+after that (pre-reqs for buildozer)
+
+installed: buildozer and moved from /usr/local/bin/ to /usr/bin/
+
+buildozer then installed: APACHE ANT, Android SDK, Android NDK, etc (don't remember)
+
+getting a lot of errors trying to build for android did the following (might be missing something? lots of googling)
+
+didn't make new names and just left the default name for the application as in buildozer.spec
+
+sudo pip install cython==0.21 (not all versions work, this is a downgrade from newest 0.22.1)
+some say 0.19.1 worked, some say 0.20, some say 0.21
+
+Using ~/.buildozer/android/platform/android-sdk-21/tools/android upgraded android sdk platform tools from 19.x to 20 and also upgraded the default 8 that it selected
+
+Finally worked.
+
+Didn't do this but seems like it could be valid: http://georgik.sinusgear.com/2014/03/22/kivy-buildozer-android-debug-failed-with-libstdc-so-6-cannot-open-shared-object-file/comment-page-1/
+
+android build wants 32 bit but my computer is 64 bit. it is working now so I am not going to change anything

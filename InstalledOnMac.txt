@@ -1,0 +1,9 @@
+cython
+pygame
+	homebrew
+	python 3 "proper"
+	xquartz
+	xcode
+pip
+
+If run into errors when using buildozer: try uninstalling some of this stuff - maybe it's conflicting with the same stuff that the kivy dmg already came with and is supposed to work out of the box with the default kivy.app stuff instead of the stuff I downloaded
