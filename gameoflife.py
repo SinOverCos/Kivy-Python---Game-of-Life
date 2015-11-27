@@ -220,15 +220,15 @@ class TileGrid(GridLayout):
         return next_frame
 
 
-    ## *args needed - Clock will pass one argument (time, I assume) to update_board
+    ## *args needed - Clock will pass what I assume is time
     def update_board(self, *args):
         next_frame = self.get_life_list()
-        
-        for i in range(self.tiles):
-            if next_frame[i]:
-                self.children[i].live()
+        for i, j in zip(next_frame, self.children):
+            if i:
+                j.live()
             else:
-                self.children[i].die()
+                j.die()
+                
 
     def toggle(self):
         if not self.playing:
