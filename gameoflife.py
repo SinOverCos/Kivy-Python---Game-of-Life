@@ -18,15 +18,6 @@ from kivy.uix.listview import ListView, ListItemButton
 from kivy.adapters.dictadapter import DictAdapter
 from kivy.uix.textinput import TextInput
 
-# For loading images from memory
-import io
-from kivy.core.image import Image as CoreImage
-
-import StringIO
-##from kivy.core.image.img_pygame import ImageLoaderPygame
-##from kivy.core.image.img_pil import ImageLoaderPIL
-from kivy.graphics import Rectangle, Color
-
 ## Settings panel
 from kivy.uix.settings import SettingsWithSidebar
 from gameoflifesettings import logic
@@ -39,21 +30,15 @@ import os
 
 # TODO:
 
-# Implement remove stamp functionality
-
 # Dynamic word sizes - physical word sizes change depending on screen resolution
-
-# Next: Make scrollable view with ability to delete stamps
 
 # Look for functions that are just "pass" - implement them
 
 # Document the code
 
-# Clear out the unecessary *args or fill them all with *args
-
 # Separate into modules? E.g. # from buttons import *
 
-# In get_life_list and update_board, change to walking through list instead of using indices
+# In update_board, change to walking through list instead of using indices
 
 # Make changes persistent
     # Note: external file to toggle between custom and built-in so I know which one to load
@@ -111,6 +96,11 @@ class GameScreen(Screen):
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
         self.name = "game_screen"
+
+    def on_pre_enter(self):        
+        print Window.height
+        print Window.width
+
 
 
 class MasterBox(FloatLayout):
@@ -213,12 +203,10 @@ class TileGrid(GridLayout):
         return living_neighbours
 
     def get_life_list(self):
-
         next_frame = []
-        
-        for i in range(self.tiles):
-            living_neighbours = self.number_alive(i)
-            if self.children[i].alive:
+        for child in self.children:
+            living_neighbours = self.number_alive(child.index)
+            if child.alive:
                 if living_neighbours in self.req_to_live:
                     next_frame.append(True)
                 else:
@@ -231,8 +219,11 @@ class TileGrid(GridLayout):
 
         return next_frame
 
+
+    ## *args needed - Clock will pass one argument (time, I assume) to update_board
     def update_board(self, *args):
         next_frame = self.get_life_list()
+        
         for i in range(self.tiles):
             if next_frame[i]:
                 self.children[i].live()
@@ -248,18 +239,19 @@ class TileGrid(GridLayout):
             self.running = None
             self.playing = False
 
-    def stop(self, *args):
+
+    def stop(self):
         if self.running != None:
             Clock.unschedule(self.running)
             self.running = None
             self.playing = False
 
-    def save_state(self, *args):
+    def save_state(self):
         self.initial_state = []
         for child in self.children:
             self.initial_state.append(child.alive)
 
-    def load_initial_state(self, *args):
+    def load_initial_state(self):
         if self.initial_state == None:
             print "No initial state to go back to."
         else:
@@ -309,7 +301,7 @@ class TileGrid(GridLayout):
 
     ## Takes the current state, trims away outer dead rows/columns to save
     ## the smallest possible grid that contains the current pattern
-    def record_stamp(self, *args):
+    def record_stamp(self):
 
         ## Save everything in a grid
         state_matrix = []
@@ -493,11 +485,11 @@ class PlayPauseButton(Button):
         self.font_size = 20
         self.playing = False
 
-    def stop(self, *args):
+    def stop(self):
         self.text = "Play"
         self.playing = False
 
-    def on_release(self, *args):
+    def on_release(self):
         if not self.playing:
             root.ids["grid"].save_state()
         
@@ -517,7 +509,7 @@ class NextButton(Button):
         self.text = "Next"
         self.font_size = 20
 
-    def on_release(self, *args):
+    def on_release(self):
         root.ids["grid"].update_board()
 
 
@@ -527,7 +519,7 @@ class RestoreButton(Button):
         self.text = "Restore"
         self.font_size = 20
 
-    def on_release(self, *args):
+    def on_release(self):
         root.ids["grid"].load_initial_state()
 
 
@@ -537,7 +529,7 @@ class SaveButton(Button):
         self.text = "Save"
         self.font_size = 20
 
-    def on_release(self, *args):
+    def on_release(self):
         root.ids["grid"].record_stamp()
         root.current = "save_stamp_screen"
 
@@ -547,7 +539,7 @@ class RandomButton(Button):
         super(RandomButton, self).__init__(**kwargs)
         self.text = "Random"
         self.font_size = 20
-    def on_release(self, *args):
+    def on_release(self):
         root.ids["grid"].randomize()
 
 
@@ -557,7 +549,7 @@ class ClearButton(Button):
         self.text = "Clear"
         self.font_size = 20
 
-    def on_release(self, *args):
+    def on_release(self):
         root.ids["grid"].clear_board()
         root.ids["grid"].stop()
         root.ids["play_pause_button"].stop()
@@ -570,7 +562,7 @@ class PenButton(Button):
         self.text = "Pen"
         self.font_size = 20
 
-    def on_release(self, *args):
+    def on_release(self):
         Tile.to_draw_mode()
  
 
@@ -580,7 +572,7 @@ class StampButton(Button):
         self.text = "Stamp"
         self.font_size = 20
 
-    def on_release(self, *args):
+    def on_release(self):
         Tile.to_stamp_mode()
         
 
@@ -590,7 +582,7 @@ class ChooseStampButton(Button):
         self.text = "Choose Stamp"
         self.font_size = 20
 
-    def on_release(self, **kwargs):
+    def on_release(self):
         root.current = "stamp_screen"
 
 
@@ -673,7 +665,7 @@ class Tile(Image):
     # self.departed: true if the touch has left this tile and come back again.
     # Status should only be updated if the user is returning
     # not continuously shift back and forth because user's finger stayed too long
-    def on_touch_move(self, touch, *args):
+    def on_touch_move(self, touch):
 
         ## If coming back to this tile and in draw mode:
         if self.departed and Tile.draw_mode == True and (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
@@ -688,7 +680,7 @@ class Tile(Image):
             self.departed = True
 
 
-    def on_touch_down(self, touch, *args):
+    def on_touch_down(self, touch):
 
         self.get_bounds()
 
@@ -707,7 +699,7 @@ class Tile(Image):
             ## Either way, departed is now False
             self.departed = False
 
-    def on_touch_up(self, touch, *args):
+    def on_touch_up(self, touch):
 
         self.get_bounds()
 
@@ -932,9 +924,13 @@ class DeleteStampButton(Button):
         super(DeleteStampButton, self).__init__(**kwargs)
         self.font_size = 20
         self.text = "Delete"
+        self.selection = None
 
     def on_release(self):
-        print "Implement way to delete self.selection from the backend"
+        viewer = root.ids["stamp_select_viewer"]
+        del viewer.stamp_dict[self.selection]
+        viewer.write_stamps_to_file("gameoflifestamps.txt", viewer.stamp_dict)
+        print "Stamp will be gone on next load"
 
     def notify(self, adapater):
         pass
@@ -1032,7 +1028,7 @@ class StampViewer(GridLayout):
         ## Initiate the preview
         ## Reread every time in case user added new stamp and is trying it out
         self.clear_widgets()
-        self.read_stamps_from_file("gameoflifestamps.txt")
+        self.stamp_dict = self.read_stamps_from_file("gameoflifestamps.txt")
         self.add_widget(StampThumbnail(1, 1, [2, 3], [3], None))
         Buttons = GridLayout(rows=1, cols=2, size_hint=(1.0, 0.05))
         Buttons.add_widget(DeleteStampButton())
@@ -1067,7 +1063,7 @@ class StampViewer(GridLayout):
             stamp_dict[stamp_name] = {"name" : stamp_name,
                                       "grid" : stamp_matrix}
         stamps.close()
-        self.stamp_dict = stamp_dict
+        return stamp_dict
 
     ## Takes a stamp file name and a dictionary of stamps and writes it to file
     def write_stamps_to_file(self, stamp_file, stamp_dict):
@@ -1076,7 +1072,7 @@ class StampViewer(GridLayout):
         stamps.write("# Name : row : row : ...\n")
         
         for stamp in stamp_dict:
-            stamp_matrix = stamp_dict[stamp]
+            stamp_matrix = stamp_dict[stamp]["grid"]
             line = stamp + ":"
             for row in stamp_matrix:
                 str_row = ""
