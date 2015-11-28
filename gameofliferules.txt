@@ -1,5 +1,3 @@
-## Copied from Simon Marquis
-## Name : req to live : req to come alive
 Conway:23:3
 Maze:3:12345
 Wavy:3:45678

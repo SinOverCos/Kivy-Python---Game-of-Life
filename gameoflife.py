@@ -30,15 +30,15 @@ import os
 
 # TODO:
 
-# Dynamic word sizes - physical word sizes change depending on screen resolution
-
 # Look for functions that are just "pass" - implement them
+
+
+# Change button texts to images since buttons don't support pictures
+# Remember to have both button down and button up pictures
 
 # Document the code
 
 # Separate into modules? E.g. # from buttons import *
-
-# In update_board, change to walking through list instead of using indices
 
 # Make changes persistent
     # Note: external file to toggle between custom and built-in so I know which one to load
@@ -56,9 +56,6 @@ import os
 
 # Dictionarie!!S!! to map names to files (like "Green Fade" to "GreenFade.png")
 
-# Change button texts to images since buttons don't support pictures
-# Remember to have both button down and button up pictures
-
 # Change to Android toasts:
 # print "The whole board is empty - there is nothing to save."
 # print "No initial state to go back to."
@@ -66,18 +63,24 @@ import os
 # print "There is no stamp to paste."
 # print "That's ridiculous - let's do size = 1."
 
-# Rewrite TileGrid's instance variables side_len, rows, cols, tiles to class variables
-
-# Alphabetize selection list
+# Dynamic word sizes - physical word sizes change depending on screen resolution
 
 # Need to separate resize/move from drawing
 # Currently, initial taps from resize/move will draw dots
 
-# In numeric fields, "0" will be gone if at the beginning with numeric,
-# But using string input is awkward
 
-# Adjust top and bottom margins so that vert. len of tile is a divisor or height, and a multiple of vert. len. Of tile is also a divisor of width
 
+## Future TODOs - difficult right now
+
+# Save user-defined rules. Not hard to implement but since the Kivy settings panel is given, there's
+#   no way for me to add a button that's just used for saving. The alternative is to make yet another
+#   button to say "save current rules" but the game screen is already cluttered enough, and it would
+#   be a useless button most of the time
+
+
+# In numeric fields, "0" will be gone if at the beginning with numeric, but using string input is awkward
+# And int field that limits the user's keyboard to numbers will also return an int with the leading
+#   zeros stripped off
 
 class Juggler(ScreenManager):
     def __init__(self, **kwargs):
@@ -721,7 +724,6 @@ class GameOfLifeApp(App):
             u'req_to_live' : self.update_req_to_live,
             u'req_to_birth' : self.update_req_to_birth,
             u'rule_to_use' : self.update_rule_to_use,
-            u'stamp_to_use' : self.update_stamp_to_use,
 
             u'live_tile' : self.update_live_tile,
             u'dead_tile' : self.update_dead_tile,
@@ -730,6 +732,38 @@ class GameOfLifeApp(App):
             u'custom_live_tile' : self.update_custom_live_tile,
             u'custom_dead_tile' : self.update_custom_dead_tile,
             u'custom_background' : self.update_custom_background }
+
+        self.rules = self.read_rules_from_file("gameofliferules.txt")
+
+
+    def read_rules_from_file(self, filename):
+        rules = {}
+        rule_file = open(filename, "r")
+        for line in rule_file:
+            rule = line.split(":")
+
+            print rule[0], rule[1], rule[2]
+            for i in range(len(rule[1])):
+                print rule[1][i]
+            for i in range(len(rule[2])):
+                print rule[2][i]
+            
+            living_req_str = rule[1]
+            living_req_list = []
+            living_req_len = len(living_req_str)
+            for i in range(living_req_len):
+                living_req_list.append(int(living_req_str[i]))
+
+            birth_req_str = rule[2][:-1] ## Get rid of newline character at the end
+            birth_req_list = []
+            birth_req_len = len(birth_req_str)
+            for i in range(birth_req_len):
+                birth_req_list.append(int(birth_req_str[i]))
+
+            rules[rule[0]] = (living_req_list, birth_req_list)
+
+        return rules
+            
 
     def build_grid(self):
 
@@ -761,8 +795,7 @@ class GameOfLifeApp(App):
             "updates_per_second" : 10,
             "req_to_live" : "2, 3",
             "req_to_birth" : "3",
-            "rule_to_use" : "Conway",
-            "stamp_to_use" : "Glider"})
+            "rule_to_use" : "Conway",})
         config.setdefaults("aesthetics", {
             "live_tile" : "GreenFade",
             "dead_tile" : "Transparent",
@@ -812,10 +845,10 @@ class GameOfLifeApp(App):
         self.grid.req_to_birth = new_numbers
 
     def update_rule_to_use(self, new_rule_to_use):
-        pass
-
-    def update_stamp_to_use(self, new_stamp_to_use):
-        pass
+        print "New rule's name: ", new_rule_to_use
+        new_rule_set = self.rules[new_rule_to_use]
+        self.update_req_to_live(new_rule_set[0])
+        self.update_req_to_birth(new_rule_set[1])
 
     def update_live_tile(self, new_live_tile):
         pass
@@ -907,9 +940,6 @@ class ReturnButton(Button):
         print self.selection
         Tile.to_stamp_mode()
 
-    def notify(self, adapter):
-        pass
-
 
 class SelectStampButton(Button):
     def __init__(self, **kwargs):
@@ -931,9 +961,6 @@ class DeleteStampButton(Button):
         del viewer.stamp_dict[self.selection]
         viewer.write_stamps_to_file("gameoflifestamps.txt", viewer.stamp_dict)
         print "Stamp will be gone on next load"
-
-    def notify(self, adapater):
-        pass
 
 
 class StampThumbnail(TileGrid):
@@ -1171,5 +1198,6 @@ class AboutMeScreen(Screen):
 
 
 if __name__ == "__main__":
-    os.remove("gameoflife.ini")
+    ## gameoflife.ini disappeared after altering the settings file
+    ##os.remove("gameoflife.ini")
     GameOfLifeApp().run()

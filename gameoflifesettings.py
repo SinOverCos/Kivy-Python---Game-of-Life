@@ -1,5 +1,14 @@
 import json
 
+RULE_FILE_NAME = "gameofliferules.txt"
+rule_names = []
+rule_file = open(RULE_FILE_NAME, "r")
+for line in rule_file:
+	rule = line.split(":")
+	rule_names.append(rule[0])
+
+	
+
 logic = json.dumps([
     {'type': 'title',
      'title': 'Gameplay Settings'},
@@ -23,13 +32,7 @@ logic = json.dumps([
      'desc': 'Load a pre-defined set of rules',
      'section': 'logic',
      'key': 'rule_to_use',
-     'options': ['Conway', 'Alt_1_placeholder', 'How_to_add_more?', 'alphanumeric order please', 'how to remove rule']},
-    {'type': 'options',
-     'title': 'Stamp',
-     'desc': 'Choose your stamp',
-     'section': 'logic',
-     'key': 'stamp_to_use',
-     'options': ['Glider', 'Glider Gun', 'howtoaddmore', 'alphanueric', 'm', 'a', 'd', '1', '3', '2', '4', '5', '6', '7', '8', '9', '0', 'e']}])
+     'options': rule_names}])
 
 aesthetics = json.dumps([
     {'type': 'title',
