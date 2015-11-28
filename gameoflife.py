@@ -40,16 +40,6 @@ import os
 
 # Separate into modules? E.g. # from buttons import *
 
-# Make changes persistent
-    # Note: external file to toggle between custom and built-in so I know which one to load
-    # Note: Split by " = " for gameoflife.ini, and remove the os.remove() line
-    # Tile live image
-    # Tile dead image
-    # Tile size
-    # Background image
-    # Update speed
-    # Life requirement * apply to both game screen and preview screen
-    # Birth requirement * apply to both game screen and preview screen
 
 # Figure out naming: it might cause problems when compiling (need to name main.py?)
 # main.py already exists from tutorial
@@ -78,9 +68,28 @@ import os
 # E.g. living requirement was "1, 2, 3, 4, 5". User chooses "Conway" as the rule set to use
 # The game should automatically change living requirement to say "2, 3" to reflect that
 # After about two hours to trying things and reading documentation, I just can't get it to work
+# I don't know what I'm doing wrong
 # It seems that Config.set only works from within the build_config() method. Even if I save
 #   that Config reference and use it to set a field by calling Config.set from another method,
 #   it will not work (but works fine if I use Config.set() from within build_config)
+
+
+# Similarly, this is also difficult due to Config being unusable outside of build_config()
+# I have no idea what I'm doing wrong
+# To prevent confusion (the app's old settings are loaded in the settings panel but the defaults
+#   are actually the rules in effect) gameoflife.ini is being removed every time the app is run
+#   so the app is forced to display default selections on the settings panel (conforming to the
+#   default rules in effect)
+# Make changes persistent
+    # Note: external file to toggle between custom and built-in so I know which one to load
+    # Note: Split by " = " for gameoflife.ini, and remove the os.remove() line
+    # Tile live image
+    # Tile dead image
+    # Tile size
+    # Background image
+    # Update speed
+    # Life requirement * apply to both game screen and preview screen
+    # Birth requirement * apply to both game screen and preview screen
 
 
 # Save user-defined rules. Not hard to implement but since the Kivy settings panel is given, there's
@@ -772,14 +781,8 @@ class GameOfLifeApp(App):
             
 
     def build_grid(self):
-
-        ## Tile ids match grid.children indices
-        ## [n<-----]
-        ## [<------]
-        ## [<-- 1 0]
-##        for i in range(self.grid.tiles):
-##            self.grid.add_widget(Tile(self.grid.tiles - i - 1))
         self.grid.build_self()
+
     
     def build(self):
         self.root = Juggler()
@@ -859,7 +862,6 @@ class GameOfLifeApp(App):
         self.grid.req_to_birth = new_numbers
 
     def update_rule_to_use(self, config, new_rule_to_use):
-        print "New rule's name: ", new_rule_to_use
         new_rule_set = self.rules[new_rule_to_use]
         self.update_req_to_live(config, new_rule_set[0])
         self.update_req_to_birth(config, new_rule_set[1])
@@ -1148,9 +1150,6 @@ class NameBox(TextInput):
         self.font_size = 150
         self.size_hint_y = 0.3
         self.text = "New.txt"
-
-    def on_text(self, instance, value):
-        print instance, value
         
 
 class SaveNameButton(Button):
@@ -1186,7 +1185,8 @@ class SaveNameButton(Button):
         self.stamp_grid = root.ids["grid"].stamp
         self.append_stamp_to_file("gameoflifestamps.txt", self.stamp_name, self.stamp_grid)
         root.current = "game_screen"
-    
+
+
 ## Just a screen
 class SaveStampScreen(Screen):
     def __init__(self, **kwargs):
@@ -1202,8 +1202,6 @@ class SaveStampScreen(Screen):
            self.add_widget(nameSaver)
            self.already_set_up = True
     
-    def on_pre_leave(self):
-        pass
 
 class AboutMeScreen(Screen):
     def __init__(self, **kwargs):
@@ -1212,5 +1210,8 @@ class AboutMeScreen(Screen):
 
 
 if __name__ == "__main__":
-    ##os.remove("gameoflife.ini")
+    try:
+        os.remove("gameoflife.ini")
+    except:
+        pass
     GameOfLifeApp().run()

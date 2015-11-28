@@ -1,5 +1,3 @@
-whatever project, version it with git
-
 conway's game of life
 	[X]add squares
 	[X]start/pause
@@ -12,7 +10,7 @@ conway's game of life
 	[ ]load previous settings or delete gameoflife.ini so settings are defaulted
 	[ ]about me page
 	[X]add squares while playing/paused
-	[ ]save patterns
+	[X]save patterns
 	[X]load initial state
 	[X]add random pattern
 	[X]define your own rules
@@ -22,12 +20,8 @@ conway's game of life
 	[X]define tile size (mine)
 	[ ]change background (mine)
 	[ ]implement on_pause and on_stop
+	[ ]implement android toasts
 	[ ]save/delete your own rules
-	[ ]save/delete custom live tile
-	[ ]save/delete custom dead tile
-	[ ]save/delete background
-lighting
-battleship
-hangman
-snake
-slide
+	[ ]load pre-defined live tile
+	[ ]load pre-defined dead tile
+	[ ]load pre-defined background
