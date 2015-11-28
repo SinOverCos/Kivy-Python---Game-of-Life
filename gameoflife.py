@@ -33,7 +33,6 @@ import os
 
 # Look for functions that are just "pass" - implement them
 
-
 # Change button texts to images since buttons don't support pictures
 # Remember to have both button down and button up pictures
 
@@ -866,10 +865,10 @@ class GameOfLifeApp(App):
         self.update_req_to_birth(config, new_rule_set[1])
 
     def update_live_tile(self, config, new_live_tile):
-        pass
+        Tile.live_source = new_live_tile
     
     def update_dead_tile(self, config, new_dead_tile):
-        pass
+        Tile.dead_source = new_dead_tile
 
     ## Delete all tiles, update tile size, add new number of tiles back
     def update_tile_size(self, config, new_tile_size):
