@@ -38,6 +38,7 @@ class SettingsApp(App):
             'stringexample': 'some_string',
             'pathexample': '/'})
         config.setdefaults('my example 2', {'myboolexample': True})
+        config.set("example", "stringexample", "WORKS.......?")
     
 
     # self.config is the default config parser
@@ -49,5 +50,7 @@ class SettingsApp(App):
     # automatically called on config change
     def on_config_change(self, config, section, key, value):
         print "CONFIG: ", config, "SECTION: ", section, "KEY: ", key, "VALUE: ", value
+        print 
+        config.set("example", "stringexample", "WORKS?")
 
 SettingsApp().run()

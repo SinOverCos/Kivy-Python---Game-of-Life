@@ -14,11 +14,12 @@ from kivy.uix.gridlayout import GridLayout # Grid for the tiles
 from kivy.uix.image import Image # Image to act as tiles
 from random import random # For shuffling the tiles
 from kivy.clock import Clock # For scheduling functions
-from kivy.uix.listview import ListView, ListItemButton
-from kivy.adapters.dictadapter import DictAdapter
-from kivy.uix.textinput import TextInput
+from kivy.uix.listview import ListView, ListItemButton # For selecting stamps
+from kivy.adapters.dictadapter import DictAdapter # For selecting stamps
+from kivy.uix.textinput import TextInput # For saving stamps
 
 ## Settings panel
+from kivy.config import ConfigParser
 from kivy.uix.settings import SettingsWithSidebar
 from gameoflifesettings import logic
 from gameoflifesettings import aesthetics
@@ -71,6 +72,17 @@ import os
 
 
 ## Future TODOs - difficult right now
+
+# Given up:
+# Use Config.set() to set the living and birth requirements in the settings panel to reflect
+#   the new set of rules that the user chose
+# E.g. living requirement was "1, 2, 3, 4, 5". User chooses "Conway" as the rule set to use
+# The game should automatically change living requirement to say "2, 3" to reflect that
+# After about two hours to trying things and reading documentation, I just can't get it to work
+# It seems that Config.set only works from within the build_config() method. Even if I save
+#   that Config reference and use it to set a field by calling Config.set from another method,
+#   it will not work (but works fine if I use Config.set() from within build_config)
+
 
 # Save user-defined rules. Not hard to implement but since the Kivy settings panel is given, there's
 #   no way for me to add a button that's just used for saving. The alternative is to make yet another
@@ -543,6 +555,7 @@ class RandomButton(Button):
         self.text = "Random"
         self.font_size = 20
     def on_release(self):
+        root.ids["play_pause_button"].stop()
         root.ids["grid"].randomize()
 
 
@@ -718,7 +731,7 @@ class GameOfLifeApp(App):
 
     def __init__(self, **kwargs):
         super(GameOfLifeApp, self).__init__(**kwargs)
-
+        
         self.settings_functions = {
             u'updates_per_second' : self.update_updates_per_second,
             u'req_to_live' : self.update_req_to_live,
@@ -741,12 +754,6 @@ class GameOfLifeApp(App):
         rule_file = open(filename, "r")
         for line in rule_file:
             rule = line.split(":")
-
-            print rule[0], rule[1], rule[2]
-            for i in range(len(rule[1])):
-                print rule[1][i]
-            for i in range(len(rule[2])):
-                print rule[2][i]
             
             living_req_str = rule[1]
             living_req_list = []
@@ -805,6 +812,7 @@ class GameOfLifeApp(App):
             "custom_dead_tile" : "/",
             "custom_background" : "/"})
 
+
     def build_settings(self, settings):
         settings.add_json_panel("Gameplay", self.config, data=logic)
         settings.add_json_panel("Aesthetics", self.config, data=aesthetics)
@@ -815,12 +823,12 @@ class GameOfLifeApp(App):
         print "Key: ", type(key), key
         print "Value: ", type(value), value
         print "Calling the function: ", self.settings_functions.get(key, self.setting_not_found)
-        self.settings_functions.get(key, self.setting_not_found)(value)
+        self.settings_functions.get(key, self.setting_not_found)(config, value)
 
     def setting_not_found(self, value):
         print "Can't do anything about %s, setting not found!" % str(value)
 
-    def update_updates_per_second(self, new_updates_per_second):
+    def update_updates_per_second(self, config, new_updates_per_second):
         new_updates_per_second = float(new_updates_per_second)
         self.grid.updates_per_second = new_updates_per_second
 
@@ -834,36 +842,43 @@ class GameOfLifeApp(App):
                 new_numbers.append(int(char))
         return new_numbers
 
-    def update_req_to_live(self, new_req_to_live):
+    def update_req_to_live(self, config, new_req_to_live):
         new_numbers = self.to_single_digits(new_req_to_live)
         print "New list of allowable neighbours to stay alive: ", new_numbers
         self.grid.req_to_live = new_numbers
+        
+        new_live_str = ""
+        for char in new_numbers:
+            new_live_str += str(char)
+            new_live_str += ", "
+        new_live_str = new_live_str[:-2]
+
                 
-    def update_req_to_birth(self, new_req_to_birth):
+    def update_req_to_birth(self, config, new_req_to_birth):
         new_numbers = self.to_single_digits(new_req_to_birth)
         print "New list of neighbours needed to come to live: ", new_numbers
         self.grid.req_to_birth = new_numbers
 
-    def update_rule_to_use(self, new_rule_to_use):
+    def update_rule_to_use(self, config, new_rule_to_use):
         print "New rule's name: ", new_rule_to_use
         new_rule_set = self.rules[new_rule_to_use]
-        self.update_req_to_live(new_rule_set[0])
-        self.update_req_to_birth(new_rule_set[1])
+        self.update_req_to_live(config, new_rule_set[0])
+        self.update_req_to_birth(config, new_rule_set[1])
 
-    def update_live_tile(self, new_live_tile):
+    def update_live_tile(self, config, new_live_tile):
         pass
     
-    def update_dead_tile(self, new_dead_tile):
+    def update_dead_tile(self, config, new_dead_tile):
         pass
 
     ## Delete all tiles, update tile size, add new number of tiles back
-    def update_tile_size(self, new_tile_size):
+    def update_tile_size(self, config, new_tile_size):
         self.grid.update_tile_size(new_tile_size)
 
-    def update_background(self, new_background):
+    def update_background(self, config, new_background):
         pass
 
-    def update_custom_live_tile(self, new_live_tile):
+    def update_custom_live_tile(self, config, new_live_tile):
         new_path = str(new_live_tile)
         print "New path for life tiles: ", new_path
         Tile.live_source = new_path
@@ -871,7 +886,7 @@ class GameOfLifeApp(App):
             if child.alive:
                 child.source = new_path
 
-    def update_custom_dead_tile(self, new_dead_tile):
+    def update_custom_dead_tile(self, config, new_dead_tile):
         new_path = str(new_dead_tile)
         print "New path for dead tiles: ", new_path
         Tile.dead_source = new_path
@@ -879,7 +894,7 @@ class GameOfLifeApp(App):
             if not child.alive:
                 child.source = new_path
 
-    def update_custom_background(self, new_background):
+    def update_custom_background(self, config, new_background):
         pass
 
 
@@ -1198,6 +1213,5 @@ class AboutMeScreen(Screen):
 
 
 if __name__ == "__main__":
-    ## gameoflife.ini disappeared after altering the settings file
     ##os.remove("gameoflife.ini")
     GameOfLifeApp().run()
