@@ -1,6 +1,5 @@
-## To determine window size
-from kivy.config import Config
-from kivy.core.window import Window
+from kivy.config import Config # For settings
+from kivy.core.window import Window # To determine window size
 
 ## The app
 from kivy.app import App # To run the app
@@ -12,6 +11,7 @@ from kivy.uix.button import Button # For options
 from kivy.uix.scatter import Scatter # Movable and zoomable space
 from kivy.uix.gridlayout import GridLayout # Grid for the tiles
 from kivy.uix.image import Image # Image to act as tiles
+from kivy.properties import StringProperty # Test for image source
 from random import random # For shuffling the tiles
 from kivy.clock import Clock # For scheduling functions
 from kivy.uix.listview import ListView, ListItemButton # For selecting stamps
@@ -31,7 +31,7 @@ import os
 
 # TODO:
 
-# Look for functions that are just "pass" - implement them
+# Fix the default tile size generated - look like long rectangles right now
 
 # Change button texts to images since buttons don't support pictures
 # Remember to have both button down and button up pictures
@@ -40,11 +40,8 @@ import os
 
 # Separate into modules? E.g. # from buttons import *
 
-
 # Figure out naming: it might cause problems when compiling (need to name main.py?)
 # main.py already exists from tutorial
-
-# Dictionarie!!S!! to map names to files (like "Green Fade" to "GreenFade.png")
 
 # Change to Android toasts:
 # print "The whole board is empty - there is nothing to save."
@@ -54,9 +51,6 @@ import os
 # print "That's ridiculous - let's do size = 1."
 
 # Dynamic word sizes - physical word sizes change depending on screen resolution
-
-# Need to separate resize/move from drawing
-# Currently, initial taps from resize/move will draw dots
 
 
 
@@ -80,6 +74,8 @@ import os
 #   are actually the rules in effect) gameoflife.ini is being removed every time the app is run
 #   so the app is forced to display default selections on the settings panel (conforming to the
 #   default rules in effect)
+
+
 # Make changes persistent
     # Note: external file to toggle between custom and built-in so I know which one to load
     # Note: Split by " = " for gameoflife.ini, and remove the os.remove() line
@@ -101,6 +97,17 @@ import os
 # In numeric fields, "0" will be gone if at the beginning with numeric, but using string input is awkward
 # And int field that limits the user's keyboard to numbers will also return an int with the leading
 #   zeros stripped off
+
+PY_WIDTH = 600
+PY_HEIGHT = 1200
+
+TOP_BAR_SCALE = 0.1
+GRID_SCALE = 0.8
+BOTTOM_BAR_SCALE = 0.1
+
+Config.set("graphics", "width", str(int(0.5*PY_WIDTH)))
+Config.set("graphics", "height", str(int(0.5*PY_HEIGHT)))
+Window.size = (int(0.5*PY_WIDTH), int(0.5*PY_HEIGHT))
 
 class Juggler(ScreenManager):
     def __init__(self, **kwargs):
@@ -135,8 +142,12 @@ class TileGrid(GridLayout):
         super(TileGrid, self).__init__(**kwargs)
 
         self.side_len = 30
-        self.rows = Window.height/self.side_len
-        self.cols = Window.width/self.side_len
+        print "self.side_len:", self.side_len, ", PY_HEIGHT:", PY_HEIGHT, "GRID_SCALE*PY_HEIGHT:", GRID_SCALE*PY_HEIGHT,
+        print ", GRID_SCALE*PY_HEIGHT/self.side_len", int(GRID_SCALE*PY_HEIGHT/self.side_len)
+        print "self.side_len:", self.side_len, ", PY_WIDTH:", PY_WIDTH,
+        print ", PY_WIDTH/self.side_len", PY_WIDTH/self.side_len
+        self.rows = int((GRID_SCALE)*PY_HEIGHT/self.side_len) ## GRID_SCALE is proportion of screen height used for grid
+        self.cols = PY_WIDTH/self.side_len
         self.tiles = self.rows*self.cols
 
         self.req_to_live = [2, 3]
@@ -156,7 +167,7 @@ class TileGrid(GridLayout):
 
     ## Need to update rows, cols, tiles when self.side_len changes
     def update_rct(self):
-        self.rows = int(0.8*Window.height/self.side_len)
+        self.rows = int(GRID_SCALE*Window.height/self.side_len)
         self.cols = Window.width/self.side_len
         self.tiles = self.rows*self.cols
 
@@ -449,9 +460,9 @@ class TileGrid(GridLayout):
         try:
             # Try statement in case no user enters no numeric character
             new_tile_size = int(clean_number)
-            if new_tile_size < 10:
-                print "That's ridiculous - let's do size = 10."
-                new_tile_size = 10
+            if new_tile_size < 5:
+                print "That's ridiculous - let's do size = 5."
+                new_tile_size = 5
         except:
             ## Does nothing in the app.
             print "Invalid input given for new tile size."
@@ -534,6 +545,8 @@ class NextButton(Button):
 
     def on_release(self):
         root.ids["grid"].update_board()
+        print "width:", Window.width
+        print "height:", Window.height
 
 
 class RestoreButton(Button):
@@ -626,7 +639,7 @@ class Tile(Image):
     live_source = "GreenFade.png"
     dead_source = "Transparent.png"
     side_len = 30
-    rows = Window.height/side_len
+    rows = int(GRID_SCALE*Window.height/side_len)
     cols = Window.width/side_len
 
     draw_mode = True
@@ -648,7 +661,7 @@ class Tile(Image):
     ## Update rows and cols after side_len has changed
     @staticmethod
     def update_rc():
-        Tile.rows = Window.height/Tile.side_len
+        Tile.rows = int(GRID_SCALE*Window.height/Tile.side_len)
         Tile.cols = Window.width/Tile.side_len
 
     ## Changes tile behaviour to draw mode
@@ -755,6 +768,7 @@ class GameOfLifeApp(App):
             u'custom_background' : self.update_custom_background }
 
         self.rules = self.read_rules_from_file("gameofliferules.txt")
+        self.tiles = self.read_tiles_from_file("gameoflifetiles.txt")
 
 
     def read_rules_from_file(self, filename):
@@ -778,7 +792,14 @@ class GameOfLifeApp(App):
             rules[rule[0]] = (living_req_list, birth_req_list)
 
         return rules
-            
+
+    def read_tiles_from_file(self, filename):
+        tiles = {}
+        tile_file = open(filename, "r")
+        for line in tile_file:
+            tile = line.split(":")
+            tiles[tile[0]] = tile[1][:-1] ## Get rid of the newline character at the end
+        return tiles
 
     def build_grid(self):
         self.grid.build_self()
@@ -806,13 +827,12 @@ class GameOfLifeApp(App):
             "req_to_birth" : "3",
             "rule_to_use" : "Conway",})
         config.setdefaults("aesthetics", {
-            "live_tile" : "GreenFade",
+            "live_tile" : "Green Fade",
             "dead_tile" : "Transparent",
             "tile_size" : 30,
             "background" : "Black",
             "custom_live_tile" : "/",
-            "custom_dead_tile" : "/",
-            "custom_background" : "/"})
+            "custom_dead_tile" : "/"})
 
 
     def build_settings(self, settings):
@@ -827,7 +847,7 @@ class GameOfLifeApp(App):
         print "Calling the function: ", self.settings_functions.get(key, self.setting_not_found)
         self.settings_functions.get(key, self.setting_not_found)(config, value)
 
-    def setting_not_found(self, value):
+    def setting_not_found(self, value, *args):
         print "Can't do anything about %s, setting not found!" % str(value)
 
     def update_updates_per_second(self, config, new_updates_per_second):
@@ -867,23 +887,33 @@ class GameOfLifeApp(App):
         self.update_req_to_birth(config, new_rule_set[1])
 
     def update_live_tile(self, config, new_live_tile):
-        Tile.live_source = new_live_tile
+        Tile.live_source = self.tiles[str(new_live_tile)]
+        print "Tile.live_source is updated to: ", Tile.live_source
+        for child in self.root.ids["grid"].children:
+            if child.alive:
+                child.source = Tile.live_source
     
     def update_dead_tile(self, config, new_dead_tile):
-        Tile.dead_source = new_dead_tile
+        Tile.dead_source = self.tiles[str(new_dead_tile)]
+        print "Tile.dead_source is updated to: ", Tile.dead_source
+        for child in self.root.ids["grid"].children:
+            if not child.alive:
+                child.source = Tile.dead_source
 
     ## Delete all tiles, update tile size, add new number of tiles back
+    ## This takes a while...
     def update_tile_size(self, config, new_tile_size):
         self.grid.update_tile_size(new_tile_size)
 
+    ## Not going to implement
     def update_background(self, config, new_background):
         pass
 
     def update_custom_live_tile(self, config, new_live_tile):
         new_path = str(new_live_tile)
-        print "New path for life tiles: ", new_path
+        print "New path for live tiles: ", new_path
         Tile.live_source = new_path
-        for child in self.root.grid.children:
+        for child in self.root.ids["grid"].children:
             if child.alive:
                 child.source = new_path
 
@@ -891,10 +921,11 @@ class GameOfLifeApp(App):
         new_path = str(new_dead_tile)
         print "New path for dead tiles: ", new_path
         Tile.dead_source = new_path
-        for child in self.root.grid.children:
+        for child in self.root.ids["grid"].children:
             if not child.alive:
                 child.source = new_path
 
+    ## Not going to implement
     def update_custom_background(self, config, new_background):
         pass
 
@@ -1008,7 +1039,7 @@ class StampThumbnail(TileGrid):
         self.build_self()
 
     def update_rct(self):
-        self.rows = int(0.4*Window.height/self.side_len)
+        self.rows = int(0.4*Window.height/self.side_len) ## 0.4 is scale of the demo grid
         self.cols = Window.width/self.side_len
         self.tiles = self.rows*self.cols
 

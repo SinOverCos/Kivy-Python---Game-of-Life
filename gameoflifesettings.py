@@ -7,7 +7,12 @@ for line in rule_file:
 	rule = line.split(":")
 	rule_names.append(rule[0])
 
-	
+TILE_FILE_NAME = "gameoflifetiles.txt"
+tile_names = []
+tile_file = open(TILE_FILE_NAME, "r")
+for line in tile_file:
+	tile = line.split(":")
+	tile_names.append(tile[0])
 
 logic = json.dumps([
     {'type': 'title',
@@ -36,19 +41,19 @@ logic = json.dumps([
 
 aesthetics = json.dumps([
     {'type': 'title',
-     'title': 'Tile and Background Settings'},
+     'title': 'Tile Settings'},
     {'type': 'options',
      'title': 'Live Tile',
      'desc': 'The look of living tiles',
      'section': 'aesthetics',
      'key': 'live_tile',
-     'options': ['Green Fade', 'add more']},
+     'options': tile_names},
     {'type': 'options',
      'title': 'Dead Tile',
      'desc': 'The look of dead tiles',
      'section': 'aesthetics',
      'key': 'dead_tile',
-     'options': ['Transparent', 'add more']},
+     'options': tile_names},
     {'type': 'numeric',
      'title': 'Tile Size',
      'desc': 'The size of tiles in pixels: changes number of tiles\nToo many tiles will slow things down; takes time to render',
@@ -63,12 +68,7 @@ aesthetics = json.dumps([
      'title': 'New Dead Tile Image',
      'desc': 'Choose a new image from your phone to represent dead tiles',
      'section': 'aesthetics',
-     'key': 'custom_dead_tile'},
-    {'type': 'path',
-     'title': 'New Background Image',
-     'desc': 'Choose a new image from your phone to represent the background. Works with transparent living/dead tiles only.',
-     'section': 'aesthetics',
-     'key': 'custom_background'},
+     'key': 'custom_dead_tile'}
 ])
 
 about_me = json.dumps([
