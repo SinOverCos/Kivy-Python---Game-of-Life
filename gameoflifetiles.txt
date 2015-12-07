@@ -1,9 +1,9 @@
-Green Fade:GreenFade.png
-Solid Blue:SolidBlue.png
-Solid Green:SolidGreen.png
-Solid Red:SolidRed.png
-Solid White:SolidWhite.png
-Blue Frame:BorderBlue.png
-Green Frame:BorderGreen.png
-Red Frame:BorderRed.png
-Transparent:Transparent.png
+Green Fade:./Images/GreenFade.png
+Solid Blue:./Images/SolidBlue.png
+Solid Green:./Images/SolidGreen.png
+Solid Red:./Images/SolidRed.png
+Solid White:./Images/SolidWhite.png
+Blue Frame:./Images/BorderBlue.png
+Green Frame:./Images/BorderGreen.png
+Red Frame:./Images/BorderRed.png
+Transparent:./Images/Transparent.png

@@ -20,7 +20,7 @@ from kivy.uix.textinput import TextInput # For saving stamps
 
 ## Settings panel
 from kivy.config import ConfigParser
-from kivy.uix.settings import SettingsWithSidebar
+from kivy.uix.settings import SettingsWithSpinner
 from gameoflifesettings import logic
 from gameoflifesettings import aesthetics
 from gameoflifesettings import about_me
@@ -30,6 +30,8 @@ import os
 
 
 # TODO:
+
+# Load it up with cool stamps! :D
 
 # Fix the default tile size generated - look like long rectangles right now
 
@@ -458,7 +460,7 @@ class TileGrid(GridLayout):
         print int(clean_number)
 
         try:
-            # Try statement in case no user enters no numeric character
+            ## Try statement in case no user enters no numeric character
             new_tile_size = int(clean_number)
             if new_tile_size < 5:
                 print "That's ridiculous - let's do size = 5."
@@ -467,28 +469,12 @@ class TileGrid(GridLayout):
             ## Does nothing in the app.
             print "Invalid input given for new tile size."
             return
-        
-        print "Original tile size as per grid: ", self.side_len
-        print "Original tile size as per tile: ", Tile.side_len
-        print "Original number of rows as per grid: ", self.rows
-        print "Original number of rows as per tile: ", Tile.rows
-        print "Original number of cols as per grid: ", self.cols
-        print "Original number of cols as per tile: ", Tile.cols
-        print "Original number of tiles: ", self.tiles
 
         self.clear_widgets()
         self.side_len = new_tile_size
         self.update_rct()
         Tile.side_len = new_tile_size
         Tile.update_rc()
-
-        print "New tile size as per grid: ", self.side_len
-        print "New tile size as per tile: ", Tile.side_len
-        print "New number of rows as per grid: ", self.rows
-        print "New number of rows as per tile: ", Tile.rows
-        print "New number of cols as per grid: ", self.cols
-        print "New number of cols as per tile: ", Tile.cols
-        print "New number of tiles: ", self.tiles
 
         self.build_self()
         
@@ -636,24 +622,31 @@ class SettingsButton(Button):
 
 class Tile(Image):
 
-    live_source = "GreenFade.png"
-    dead_source = "Transparent.png"
+    live_source = "./Images/GreenFade.png"
+    dead_source = "./Images/Transparent.png"
     side_len = 30
-    rows = int(GRID_SCALE*Window.height/side_len)
-    cols = Window.width/side_len
+
+    ## In retrospect, keeping row and cols in the Tile was useless,
+    ##  and trying to keep it updated with the grid's numbers was a pain
+
+    ##rows = int(GRID_SCALE*Window.height/side_len)
+    ##cols = Window.width/side_len
 
     draw_mode = True
 
     def __init__(self, index, **kwargs):
         super(Tile, self).__init__(**kwargs)
 
-        self.source = "Transparent.png"
+        self.source = Tile.dead_source
         self.allow_stretch = True
         self.keep_ratio = False
 
         self.index = index
-        self.row_num = index/Tile.cols
-        self.col_num = index%Tile.cols
+
+        ## In retrospect, keeping row and cols in the Tile was useless,
+        ##  and trying to keep it updated with the grid's numbers was a pain
+        ##self.row_num = index/Tile.cols
+        ##self.col_num = index%Tile.cols
 
         self.alive = False
         self.departed = True
@@ -661,9 +654,12 @@ class Tile(Image):
     ## Update rows and cols after side_len has changed
     @staticmethod
     def update_rc():
-        Tile.rows = int(GRID_SCALE*Window.height/Tile.side_len)
-        Tile.cols = Window.width/Tile.side_len
-
+        ## In retrospect, keeping row and cols in the Tile was useless,
+        ##  and trying to keep it updated with the grid's numbers was a pain
+        ##Tile.rows = int(GRID_SCALE*Window.height/Tile.side_len)
+        ##Tile.cols = Window.width/Tile.side_len
+        pass
+    
     ## Changes tile behaviour to draw mode
     @staticmethod
     def to_draw_mode():
@@ -683,25 +679,25 @@ class Tile(Image):
     def print_bounds(self):
         print self.left, self.right, self.bottom, self.top
 
+    ## Enforces that this tile uses the live source
+    ## If already alive, don't bother reassigning the source
     def live(self):
-        # Waste time to re-applying the image - not sure if Kivy will just pass if
-        # self.source has not changed
         if self.alive and self.source == Tile.live_source:
             return
         self.alive = True
         self.source = Tile.live_source
-        
+
+    ## Same as live. Enforces that the tile uses the dead source
+    ## If already dead, don't bother reassigning the source
     def die(self):
-        # Waste time to re-applying the image - not sure if Kivy will just pass if
-        # self.source has not changed
         if not self.alive and self.source == Tile.dead_source:
             return
         self.alive = False
         self.source = Tile.dead_source
         
-    # self.departed: true if the touch has left this tile and come back again.
-    # Status should only be updated if the user is returning
-    # not continuously shift back and forth because user's finger stayed too long
+    # self.departed: true if the touch has left this tile.
+    # Status should only be updated if the user is returning (i.e. departed, then came back)
+    # Should not continuously shift back and forth because user's finger stayed too long
     def on_touch_move(self, touch):
 
         ## If coming back to this tile and in draw mode:
@@ -710,6 +706,7 @@ class Tile(Image):
                 self.die()
             else:
                 self.live()
+
             self.departed = False
 
         ## If touch wasn't on this tile, then departed is True
@@ -812,7 +809,7 @@ class GameOfLifeApp(App):
         self.build_grid()
 
         ## Settings panel
-        self.settings_cls = SettingsWithSidebar
+        self.settings_cls = SettingsWithSpinner
         #self.use_kivy_settings = False
 
         ## Make root accessible to all
@@ -840,11 +837,6 @@ class GameOfLifeApp(App):
         settings.add_json_panel("Aesthetics", self.config, data=aesthetics)
 
     def on_config_change(self, config, section, key, value):
-        print "Config: ", type(config), config
-        print "Section: ", type(section), section
-        print "Key: ", type(key), key
-        print "Value: ", type(value), value
-        print "Calling the function: ", self.settings_functions.get(key, self.setting_not_found)
         self.settings_functions.get(key, self.setting_not_found)(config, value)
 
     def setting_not_found(self, value, *args):
@@ -987,15 +979,7 @@ class ReturnButton(Button):
         print self.selection
         Tile.to_stamp_mode()
 
-
-class SelectStampButton(Button):
-    def __init__(self, **kwargs):
-        super(SelectStampButton, self).__init__(**kwargs)
-        self.font_size = 20
-
-    def on_release(self):
-        print "Pressed"
-
+    
 class DeleteStampButton(Button):
     def __init__(self, **kwargs):
         super(DeleteStampButton, self).__init__(**kwargs)
@@ -1005,9 +989,19 @@ class DeleteStampButton(Button):
 
     def on_release(self):
         viewer = root.ids["stamp_select_viewer"]
+        if self.selection == None:
+            return
+        print self.selection
         del viewer.stamp_dict[self.selection]
         viewer.write_stamps_to_file("gameoflifestamps.txt", viewer.stamp_dict)
         print "Stamp will be gone on next load"
+
+        ## Hack. The list view dictionary turns to None after one deletion
+        ## Not sure how that works in kivy (or if I'm doing something wrong)
+        ## For now: return user to screen after one deletion
+        ## Also hides the fact that the UI still displays the to-be-deleted stamp, lol
+        root.current = "game_screen"
+        Tile.to_draw_mode()
 
 
 class StampThumbnail(TileGrid):
@@ -1180,7 +1174,7 @@ class NameBox(TextInput):
         super(NameBox, self).__init__(**kwargs)
         self.font_size = 150
         self.size_hint_y = 0.3
-        self.text = "New.txt"
+        self.text = "New Stamp"
         
 
 class SaveNameButton(Button):
