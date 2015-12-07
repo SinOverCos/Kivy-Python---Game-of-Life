@@ -31,10 +31,6 @@ import os
 
 # TODO:
 
-# Load it up with cool stamps! :D
-
-# Fix the default tile size generated - look like long rectangles right now
-
 # Change button texts to images since buttons don't support pictures
 # Remember to have both button down and button up pictures
 
@@ -100,7 +96,7 @@ import os
 # And int field that limits the user's keyboard to numbers will also return an int with the leading
 #   zeros stripped off
 
-PY_WIDTH = 600
+PY_WIDTH = 1800
 PY_HEIGHT = 1200
 
 TOP_BAR_SCALE = 0.1
@@ -356,6 +352,7 @@ class TileGrid(GridLayout):
         ## Out-of-bounds error if continuing with empty board
         if empty:
             print "The whole board is empty - there is nothing to save."
+            self.stamp = None
             return
         
         ## print "The whole board, up-down, left-right flipped:"
@@ -553,6 +550,8 @@ class SaveButton(Button):
 
     def on_release(self):
         root.ids["grid"].record_stamp()
+        if root.ids["grid"].stamp == None:
+            return
         root.current = "save_stamp_screen"
 
 
@@ -1172,7 +1171,7 @@ class StampViewer(GridLayout):
 class NameBox(TextInput):
     def __init__(self, **kwargs):
         super(NameBox, self).__init__(**kwargs)
-        self.font_size = 150
+        self.font_size = 50
         self.size_hint_y = 0.3
         self.text = "New Stamp"
         
@@ -1181,13 +1180,16 @@ class SaveNameButton(Button):
     def __init__(self, **kwargs):
         super(SaveNameButton, self).__init__(**kwargs)
         self.font_size = 20
-        self.size_hint_y = 0.7
+        self.size_hint_y = 0.35
         self.text = "Save"
         self.stamp_name = None
         self.stamp_grid = None
 
     def append_stamp_to_file(self, stamp_file, stamp_name, stamp_matrix):
         stamps = open(stamp_file, "a")
+
+        print "Saving stamp to file:", stamp_name
+        
 
         line = stamp_name + ":"
         for row in stamp_matrix:
@@ -1206,9 +1208,19 @@ class SaveNameButton(Button):
         
     def on_release(self):
         print "Implement save to file"
-        self.stamp_name = root.ids["save_stamp_screen"].children[0].children[1].text
+        self.stamp_name = root.ids["save_stamp_screen"].children[0].children[2].text
         self.stamp_grid = root.ids["grid"].stamp
         self.append_stamp_to_file("gameoflifestamps.txt", self.stamp_name, self.stamp_grid)
+        root.current = "game_screen"
+
+class CancelButton(Button):
+    def __init__(self, **kwargs):
+        super(CancelButton, self).__init__(**kwargs)
+        self.font_size = 20
+        self.size_hint_y = 0.35
+        self.text = "Cancel"
+
+    def on_release(self):
         root.current = "game_screen"
 
 
@@ -1221,9 +1233,10 @@ class SaveStampScreen(Screen):
         
     def on_pre_enter(self):
         if not self.already_set_up:
-           nameSaver = GridLayout(size_hint=(1,1), rows=2, cols=1)
+           nameSaver = GridLayout(size_hint=(1,1), rows=3, cols=1)
            nameSaver.add_widget(NameBox())
            nameSaver.add_widget(SaveNameButton())
+           nameSaver.add_widget(CancelButton())
            self.add_widget(nameSaver)
            self.already_set_up = True
     
