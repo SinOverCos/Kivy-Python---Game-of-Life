@@ -7,7 +7,7 @@ Premise of the game:
 **Basic premise of the game:**
 - On this grid, cells are either living or dead, you decide at the beginning
 - If a cell has strictly fewer than 2 neighbours, it dies in the next frame, as if by loneliness
-- If a cell has strictly more than 3 neighbours, it dies in the next frame, as if my overpopulation
+- If a cell has strictly more than 3 neighbours, it dies in the next frame, as if by overpopulation
 - If a cell has exactly 2 or 3 neighbours, it lives to the next frame
 - If a dead cell has exactly 3 neighbours, it comes alive the next frame, as if by reproduction or migration
 
