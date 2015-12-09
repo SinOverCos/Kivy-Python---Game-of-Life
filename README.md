@@ -12,12 +12,12 @@ Premise of the game:
 - If a dead cell has exactly 3 neighbours, it comes alive the next frame, as if by reproduction or migration
 
 **Bonus material:**
-- There are many initial circumstances that can lead the board to evolve to some fascinating results, a few of these are included in this game.
-- To use these patterns, tap on the icon with 4 stamps to choose a stamp and return, then tap on the single stamp icon to go to stamp mode, and tap anywhere on the screen to paste the stamp.
-- Certain aesthetic and logical settings can be adjusted, such as the appearance of the cells and survival requirements, in the settings panel.
-- The board's original state can be restored.
-- The board can be scrambled.
-- User-defined patterns can be saved.
+- There are many initial circumstances that can lead the board to evolve to some fascinating results, a few of these are included in this game
+- To use these patterns, tap on the icon with 4 stamps to choose a stamp and return, then tap on the single stamp icon to go to stamp mode, and tap anywhere on the screen to paste the stamp
+- Certain aesthetic and logical settings can be adjusted, such as the appearance of the cells and survival requirements, in the settings panel
+- The board's original state can be restored
+- The board can be scrambled
+- User-defined patterns can be saved
 
 Installation instructions:
 ==========================
@@ -42,7 +42,7 @@ Some issues encountered along the way:
 
 - Read the comments at the top of gameoflife.py for more detail.
 
-- Kivy's widget tree is constructed at the beginning, but can't be rely on the whole tree to exist when trying to initialize other widgets though ```__init__()```. Sometimes there will be conflicts where an ```__init__()``` constructor is expecting something to be there but it's not constructed by the widget tree yet.
+- Kivy's widget tree is constructed at the beginning, but can't rely on the whole tree to exist when trying to initialize other widgets though ```__init__()```. Sometimes there will be conflicts where an ```__init__()``` constructor is expecting something to be there but it's not constructed by the widget tree yet.
 
 - The dictionary holding the list of stamps becomes None after an item is popped, don't know why.
 

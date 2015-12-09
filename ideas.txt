@@ -1,27 +1,27 @@
-conway's game of life
-	[X]add squares
-	[X]start/pause
-	[X]next frame (stolen from internet applet)
-	[X]clear board
-	[X]speed
-	[X]zoom
-	[!]move around the board (may  need revision)
-	[X]stamp (e.g. glider gun)
-	[ ]load previous settings or delete gameoflife.ini so settings are defaulted
-	[ ]about me page
-	[X]add squares while playing/paused
-	[X]save patterns
-	[X]load initial state
-	[X]add random pattern
-	[X]define your own rules
-	[X]define your own rules
-	[X]change live tile
-	[X]change dead tile
-	[X]define tile size (mine)
-	[ ]change background (mine)
-	[ ]implement on_pause and on_stop
-	[ ]implement android toasts
-	[ ]save/delete your own rules
-	[ ]load pre-defined live tile
-	[ ]load pre-defined dead tile
-	[ ]load pre-defined background
+Conway's Game of Life:
+	[X] add squares
+	[X] start/pause
+	[X] next frame
+	[X] clear board
+	[X] speed
+	[X] zoom
+	[!] move around the board (may  need revision)
+	[X] stamps (e.g. glider gun)
+	[X] load previous settings or delete gameoflife.ini so settings are defaulted
+	[ ] about me page
+	[X] add squares while playing/paused
+	[X] save patterns
+	[X] load initial state
+	[X] add random pattern
+	[X] define your own rules
+	[X] define your own rules
+	[X] change live tile
+	[X] change dead tile
+	[X] define tile size
+	[ ] change background
+	[ ] implement on_pause and on_stop
+	[ ] implement android toasts
+	[ ] save/delete your own rules
+	[X] load pre-defined live tile
+	[X] load pre-defined dead tile
+	[ ] load pre-defined background
