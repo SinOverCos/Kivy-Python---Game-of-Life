@@ -7,3 +7,10 @@ kivy tree is constructed at the beginning, but also can't rely on the whole tree
 
 
  deleting multiple stamps
+
+
+
+
+making imgaes behave like buttons (draggin the toch)
+
+mention/explain all the things in the future todo setcton
