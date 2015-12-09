@@ -29,30 +29,36 @@ from gameoflifesettings import about_me
 import os
 
 
-# TODO:
 
-# Change button texts to images since buttons don't support pictures
-# Remember to have both button down and button up pictures
+# TODO:
 
 # Document the code
 
 # Separate into modules? E.g. # from buttons import *
 
-# Figure out naming: it might cause problems when compiling (need to name main.py?)
-# main.py already exists from tutorial
+# Dynamic word sizes - physical word sizes change depending on screen resolution
+
+# Package for OS X and Windows
+
+# Package for Android - upgrade android sdk from VM
+# Package for iOS
+
+
+
+## Future TODOs - difficult right now
+
+## Compile for Android
+## Used to work on my Ubuntu machine, but I broke the computer.
+## Getting it to work on Ubuntu still took a lot of Googling - Buildozer never worked right out of the box
+## Rename to main.py and main.kv, of course
 
 # Change to Android toasts:
 # print "The whole board is empty - there is nothing to save."
 # print "No initial state to go back to."
 # print "Invalid input given for new tile size."
 # print "There is no stamp to paste."
-# print "That's ridiculous - let's do size = 1."
+# print "That's ridiculous - let's do size = 5."
 
-# Dynamic word sizes - physical word sizes change depending on screen resolution
-
-
-
-## Future TODOs - difficult right now
 
 # Given up:
 # Use Config.set() to set the living and birth requirements in the settings panel to reflect
@@ -67,14 +73,11 @@ import os
 
 
 # Similarly, this is also difficult due to Config being unusable outside of build_config()
-# I have no idea what I'm doing wrong
-# To prevent confusion (the app's old settings are loaded in the settings panel but the defaults
-#   are actually the rules in effect) gameoflife.ini is being removed every time the app is run
+# To prevent confusion (the app's old settings are loaded in the settings panel but the default
+#   rules are actually the ones in effect), gameoflife.ini is being removed every time the app is run
 #   so the app is forced to display default selections on the settings panel (conforming to the
 #   default rules in effect)
-
-
-# Make changes persistent
+# Want to changes persistent
     # Note: external file to toggle between custom and built-in so I know which one to load
     # Note: Split by " = " for gameoflife.ini, and remove the os.remove() line
     # Tile live image
@@ -86,7 +89,7 @@ import os
     # Birth requirement * apply to both game screen and preview screen
 
 
-# Save user-defined rules. Not hard to implement but since the Kivy settings panel is given, there's
+# Save user-defined rules. Not hard to implement but since the Kivy settings panel is provided, there's
 #   no way for me to add a button that's just used for saving. The alternative is to make yet another
 #   button to say "save current rules" but the game screen is already cluttered enough, and it would
 #   be a useless button most of the time
@@ -96,7 +99,16 @@ import os
 # And int field that limits the user's keyboard to numbers will also return an int with the leading
 #   zeros stripped off
 
-PY_WIDTH = 1800
+
+# Can't figure out kivy's touch propagation
+# Root passes the touch to its children and the touch is propagated recursively
+# Make the images behave more like buttons
+#   i.e. When the user touches down on a button (like pause), but drags it to the tile grid (as if changing their mind)
+#   then the game should know the touch started from a button and should not react
+
+
+
+PY_WIDTH = 1600
 PY_HEIGHT = 1200
 
 TOP_BAR_SCALE = 0.1
@@ -107,6 +119,16 @@ Config.set("graphics", "width", str(int(0.5*PY_WIDTH)))
 Config.set("graphics", "height", str(int(0.5*PY_HEIGHT)))
 Window.size = (int(0.5*PY_WIDTH), int(0.5*PY_HEIGHT))
 
+
+
+def get_bounds(bounded):
+    bounded.left = bounded.pos[0]
+    bounded.right = bounded.pos[0] + bounded.size[0]
+    bounded.bottom = bounded.pos[1]
+    bounded.top = bounded.pos[1] + bounded.size[1]
+
+
+
 class Juggler(ScreenManager):
     def __init__(self, **kwargs):
         super(Juggler, self).__init__(**kwargs)
@@ -115,9 +137,6 @@ class Juggler(ScreenManager):
         self.rise = RiseInTransition()
         self.transition = self.fade
 
-    ## on screen change: change transtion risein/fallout
-        
-    ## on screen change: need to clear out scroll's widgets
 
 
 class GameScreen(Screen):
@@ -134,12 +153,14 @@ class GameScreen(Screen):
 class MasterBox(FloatLayout):
     def __init__(self, **kwargs):
         super(MasterBox, self).__init__(**kwargs)        
-        
+
+
+
 class TileGrid(GridLayout):
     def __init__(self, **kwargs):
         super(TileGrid, self).__init__(**kwargs)
 
-        self.side_len = 30
+        self.side_len = 20
         print "self.side_len:", self.side_len, ", PY_HEIGHT:", PY_HEIGHT, "GRID_SCALE*PY_HEIGHT:", GRID_SCALE*PY_HEIGHT,
         print ", GRID_SCALE*PY_HEIGHT/self.side_len", int(GRID_SCALE*PY_HEIGHT/self.side_len)
         print "self.side_len:", self.side_len, ", PY_WIDTH:", PY_WIDTH,
@@ -251,7 +272,6 @@ class TileGrid(GridLayout):
 
         return next_frame
 
-
     ## *args needed - Clock will pass what I assume is time
     def update_board(self, *args):
         next_frame = self.get_life_list()
@@ -260,7 +280,6 @@ class TileGrid(GridLayout):
                 j.live()
             else:
                 j.die()
-                
 
     def toggle(self):
         if not self.playing:
@@ -270,7 +289,6 @@ class TileGrid(GridLayout):
             Clock.unschedule(self.running)
             self.running = None
             self.playing = False
-
 
     def stop(self):
         if self.running != None:
@@ -289,13 +307,12 @@ class TileGrid(GridLayout):
         else:
             self.stop()
             root.ids["play_pause_button"].stop()
-            n_children = len(self.children)
-            for i in range(n_children):
-                if self.initial_state[i] == True:
-                    self.children[i].live()
+            for i, j in zip(self.initial_state, self.children):
+                if i == True:
+                    j.live()
                 else:
-                    self.children[i].die()
-
+                    j.die()
+                    
     ## Keeps only the outer consecutive patterns: e.g.
     ## [0, 1, 2, 3, 6, 7, 12, 13] -> [0, 1, 2, 3, 12, 13]
     ## Assumes non-empty list
@@ -405,7 +422,6 @@ class TileGrid(GridLayout):
 
         self.stamp = state_matrix
 
-
     def enforce_life(self, row, col, state):
 
         ## If out of bounds, do nothing
@@ -478,141 +494,224 @@ class TileGrid(GridLayout):
         # Any saved state would be invalid now
         self.initial_state = None        
 
-    
-    def wave(self):
-        for i in range(len(self.children)):
-            print "child number:", i
-            self.children[i].blink()
-            print "\n"
-
-    def print_binary_matrix(self, matrix):
-        for row in matrix:
-            for col in row:
-                if col:
-                    print "1",
-                else:
-                    print "0",
-            print
 
 
-class PlayPauseButton(Button):
+class ImageButton(Image):
+    def __init__(self, **kwargs):
+        super(ImageButton, self).__init__(**kwargs)
+        ## Hack fix. Need to get bounds for the image at construction/on first touch down
+        ##  or game will crash, saying there are no left/right/top/bottom fields in this class
+        ## I created the left/right/top/bottom fields and they are used when comparing touch coordinates
+        ## It appears that a touch is applied right when the app starts up, but before get_bounds is first called
+        ## This hack fix can be avoided if I just used self.pos[1] + self.size[1] instead of self.top
+        ##  but self.top just feels so much cleaner
+        get_bounds(self)
+
+    def on_touch_down(self, touch):
+        get_bounds(self)
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.down_source
+
+    def on_touch_move(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.down_source
+        else:
+            self.source = self.up_source
+
+
+ 
+class PenButton(ImageButton):
+    def __init__(self, **kwargs):
+        super(PenButton, self).__init__(**kwargs)
+        self.up_source = "./Images/PenUp.png"
+        self.down_source = "./Images/PenDown.png"
+        self.source = self.up_source
+
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            Tile.to_draw_mode()
+
+
+        
+class StampButton(ImageButton):
+    def __init__(self, **kwargs):
+        super(StampButton, self).__init__(**kwargs)
+        self.up_source = "./Images/StampUp.png"
+        self.down_source = "./Images/StampDown.png"
+        self.source = self.up_source
+
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            Tile.to_stamp_mode()
+
+
+
+class ChooseStampButton(ImageButton):
+    def __init__(self, **kwargs):
+        super(ChooseStampButton, self).__init__(**kwargs)
+        self.up_source = "./Images/ChooseStampUp.png"
+        self.down_source = "./Images/ChooseStampDown.png"
+        self.source = self.up_source
+
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            root.ids["grid"].stop()
+            root.ids["play_pause_button"].stop()
+            root.current = "stamp_screen"
+
+
+
+class SettingsButton(ImageButton):
+    def __init__(self, **kwargs):
+        super(SettingsButton, self).__init__(**kwargs)
+        get_bounds(self)
+        self.up_source = "./Images/SettingsUp.png"
+        self.down_source = "./Images/SettingsDown.png"
+        self.source = self.up_source
+
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            root.ids["play_pause_button"].stop()
+            root.ids["grid"].stop()
+            app.open_settings()
+
+
+
+class PlayPauseButton(ImageButton):
     def __init__(self, **kwargs):
         super(PlayPauseButton, self).__init__(**kwargs)
-        self.text = "Play"
-        self.font_size = 20
+        self.play_down_source = "./Images/PlayDown.png"
+        self.play_up_source = "./Images/PlayUp.png"
+        self.pause_down_source = "./Images/PauseDown.png"
+        self.pause_up_source = "./Images/PauseUp.png"
+        self.source = self.play_up_source
         self.playing = False
 
     def stop(self):
-        self.text = "Play"
+        self.source = self.play_up_source
         self.playing = False
 
-    def on_release(self):
-        if not self.playing:
-            root.ids["grid"].save_state()
-        
-        if not self.playing:
-            self.playing = True
-            self.text = "Stop"
-        else:
-            self.playing = False
-            self.text = "Play"
-            
-        root.ids["grid"].toggle()
-        
+    def on_touch_down(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            if self.source == self.play_up_source:
+                self.source = self.play_down_source
+            elif self.source == self.pause_up_source:
+                self.source = self.pause_down_source
 
-class NextButton(Button):
+    def on_touch_move(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            if self.playing:
+                self.source = self.pause_down_source
+            else:
+                self.source = self.play_down_source
+        else:
+            if self.playing:
+                self.source = self.pause_up_source
+            else:
+                self.source = self.play_up_source
+
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            if not self.playing:
+                root.ids["grid"].save_state()
+                self.playing = True
+                self.source = self.pause_up_source
+            else:
+                self.playing = False
+                self.source = self.play_up_source
+
+            root.ids["grid"].toggle()
+
+
+
+class NextButton(ImageButton):
     def __init__(self, **kwargs):
         super(NextButton, self).__init__(**kwargs)
-        self.text = "Next"
-        self.font_size = 20
+        get_bounds(self)
+        self.up_source = "./Images/NextUp.png"
+        self.down_source = "./Images/NextDown.png"
+        self.source = self.up_source
 
-    def on_release(self):
-        root.ids["grid"].update_board()
-        print "width:", Window.width
-        print "height:", Window.height
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            root.ids["grid"].stop()
+            root.ids["play_pause_button"].stop()
+            root.ids["grid"].update_board()
 
 
-class RestoreButton(Button):
+
+class RestoreButton(ImageButton):
     def __init__(self, **kwargs):
         super(RestoreButton, self).__init__(**kwargs)
-        self.text = "Restore"
-        self.font_size = 20
+        get_bounds(self)
+        self.up_source = "./Images/RestoreUp.png"
+        self.down_source = "./Images/RestoreDown.png"
+        self.source = self.up_source
 
-    def on_release(self):
-        root.ids["grid"].load_initial_state()
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            root.ids["grid"].load_initial_state()
 
 
-class SaveButton(Button):
+
+class SaveButton(ImageButton):
     def __init__(self, **kwargs):
         super(SaveButton, self).__init__(**kwargs)
-        self.text = "Save"
-        self.font_size = 20
+        get_bounds(self)
+        self.up_source = "./Images/SaveUp.png"
+        self.down_source = "./Images/SaveDown.png"
+        self.source = self.up_source
 
-    def on_release(self):
-        root.ids["grid"].record_stamp()
-        if root.ids["grid"].stamp == None:
-            return
-        root.current = "save_stamp_screen"
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            root.ids["grid"].stop()
+            root.ids["play_pause_button"].stop()
+            root.ids["grid"].record_stamp()
+            ## grid.stamp is set to None if user tried to save blank screen
+            if root.ids["grid"].stamp == None:
+                return
+            root.current = "save_stamp_screen"
 
 
-class RandomButton(Button):
+
+class RandomButton(ImageButton):
     def __init__(self, **kwargs):
         super(RandomButton, self).__init__(**kwargs)
-        self.text = "Random"
-        self.font_size = 20
-    def on_release(self):
-        root.ids["play_pause_button"].stop()
-        root.ids["grid"].randomize()
+        get_bounds(self)
+        self.up_source = "./Images/RandomUp.png"
+        self.down_source = "./Images/RandomDown.png"
+        self.source = self.up_source
+
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            root.ids["play_pause_button"].stop()
+            root.ids["grid"].randomize()
 
 
-class ClearButton(Button):
+
+class ClearButton(ImageButton):
     def __init__(self, **kwargs):
         super(ClearButton, self).__init__(**kwargs)
-        self.text = "Clear"
-        self.font_size = 20
+        get_bounds(self)
+        self.up_source = "./Images/ClearUp.png"
+        self.down_source = "./Images/ClearDown.png"
+        self.source = self.up_source
 
-    def on_release(self):
-        root.ids["grid"].clear_board()
-        root.ids["grid"].stop()
-        root.ids["play_pause_button"].stop()
-        print root.ids["grid"].tiles
-        print len(root.ids["grid"].children)
+    def on_touch_up(self, touch):
+        if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            self.source = self.up_source
+            root.ids["grid"].clear_board()
+            root.ids["grid"].stop()
+            root.ids["play_pause_button"].stop()
 
-class PenButton(Button):
-    def __init__(self, **kwargs):
-        super(PenButton, self).__init__(**kwargs)
-        self.text = "Pen"
-        self.font_size = 20
-
-    def on_release(self):
-        Tile.to_draw_mode()
- 
-
-class StampButton(Button):
-    def __init__(self, **kwargs):
-        super(StampButton, self).__init__(**kwargs)
-        self.text = "Stamp"
-        self.font_size = 20
-
-    def on_release(self):
-        Tile.to_stamp_mode()
-        
-
-class ChooseStampButton(Button):
-    def __init__(self, **kwargs):
-        super(ChooseStampButton, self).__init__(**kwargs)
-        self.text = "Choose Stamp"
-        self.font_size = 20
-
-    def on_release(self):
-        root.current = "stamp_screen"
-
-
-class SettingsButton(Button):
-    def __init__(self, **kwargs):
-        super(SettingsButton, self).__init__(**kwargs)
-        self.text = "Settings"
-        self.font_size = 20
 
 
 # Touch: parent receives signal. If return False (default), then pass to
@@ -623,13 +722,7 @@ class Tile(Image):
 
     live_source = "./Images/GreenFade.png"
     dead_source = "./Images/Transparent.png"
-    side_len = 30
-
-    ## In retrospect, keeping row and cols in the Tile was useless,
-    ##  and trying to keep it updated with the grid's numbers was a pain
-
-    ##rows = int(GRID_SCALE*Window.height/side_len)
-    ##cols = Window.width/side_len
+    side_len = 20
 
     draw_mode = True
 
@@ -669,12 +762,6 @@ class Tile(Image):
     def to_stamp_mode():
         Tile.draw_mode = False
 
-    def get_bounds(self):
-        self.left = self.pos[0]
-        self.right = self.pos[0] + self.size[0]
-        self.bottom = self.pos[1]
-        self.top = self.pos[1] + self.size[1]
-
     def print_bounds(self):
         print self.left, self.right, self.bottom, self.top
 
@@ -693,29 +780,10 @@ class Tile(Image):
             return
         self.alive = False
         self.source = Tile.dead_source
-        
-    # self.departed: true if the touch has left this tile.
-    # Status should only be updated if the user is returning (i.e. departed, then came back)
-    # Should not continuously shift back and forth because user's finger stayed too long
-    def on_touch_move(self, touch):
-
-        ## If coming back to this tile and in draw mode:
-        if self.departed and Tile.draw_mode == True and (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
-            if self.alive == True:
-                self.die()
-            else:
-                self.live()
-
-            self.departed = False
-
-        ## If touch wasn't on this tile, then departed is True
-        if (not (self.left <= touch.x <= self.right)) or (not (self.bottom <= touch.y <= self.top)):
-            self.departed = True
-
 
     def on_touch_down(self, touch):
 
-        self.get_bounds()
+        get_bounds(self)
 
         ## If touching this tile:
         if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
@@ -732,16 +800,34 @@ class Tile(Image):
             ## Either way, departed is now False
             self.departed = False
 
+    # self.departed: true if the touch has left this tile.
+    # Status should only be updated if the user is returning (i.e. departed, then came back)
+    # Should not continuously shift back and forth because user's finger stayed too long
+    def on_touch_move(self, touch):
+
+        get_bounds(self)
+
+        ## If coming back to this tile and in draw mode:
+        if self.departed and Tile.draw_mode == True and (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+            if self.alive == True:
+                self.die()
+            else:
+                self.live()
+
+            self.departed = False
+
+        ## If touch wasn't on this tile, then departed is True
+        if (not (self.left <= touch.x <= self.right)) or (not (self.bottom <= touch.y <= self.top)):
+            self.departed = True
+
     def on_touch_up(self, touch):
 
-        self.get_bounds()
+        get_bounds(self)
 
         ## If touch up was on this dot, the departed is True
         if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
             self.departed = True
 
-    def blink(self):
-        print "tile id:", self.index
         
 
 class GameOfLifeApp(App):
@@ -766,6 +852,8 @@ class GameOfLifeApp(App):
         self.rules = self.read_rules_from_file("gameofliferules.txt")
         self.tiles = self.read_tiles_from_file("gameoflifetiles.txt")
 
+        global app
+        app = self
 
     def read_rules_from_file(self, filename):
         rules = {}
@@ -799,7 +887,6 @@ class GameOfLifeApp(App):
 
     def build_grid(self):
         self.grid.build_self()
-
     
     def build(self):
         self.root = Juggler()
@@ -825,11 +912,10 @@ class GameOfLifeApp(App):
         config.setdefaults("aesthetics", {
             "live_tile" : "Green Fade",
             "dead_tile" : "Transparent",
-            "tile_size" : 30,
+            "tile_size" : 20,
             "background" : "Black",
             "custom_live_tile" : "/",
             "custom_dead_tile" : "/"})
-
 
     def build_settings(self, settings):
         settings.add_json_panel("Gameplay", self.config, data=logic)
@@ -865,8 +951,7 @@ class GameOfLifeApp(App):
             new_live_str += str(char)
             new_live_str += ", "
         new_live_str = new_live_str[:-2]
-
-                
+               
     def update_req_to_birth(self, config, new_req_to_birth):
         new_numbers = self.to_single_digits(new_req_to_birth)
         print "New list of neighbours needed to come to live: ", new_numbers
@@ -921,6 +1006,7 @@ class GameOfLifeApp(App):
         pass
 
 
+
 ## Just a screen
 class StampScreen(Screen):
     def __init__(self, **kwargs):
@@ -944,6 +1030,7 @@ class StampScreen(Screen):
         self.children[0].children[2].stop()
 
 
+
 class ViewStampButton(ListItemButton):
     def __init__(self, **kwargs):
         super(ViewStampButton, self).__init__(**kwargs)
@@ -964,6 +1051,7 @@ class ViewStampButton(ListItemButton):
                 break
 
 
+
 class ReturnButton(Button):
     def __init__(self, **kwargs):
         super(ReturnButton, self).__init__(**kwargs)
@@ -977,6 +1065,7 @@ class ReturnButton(Button):
         root.ids["grid"].stamp = self.selection
         print self.selection
         Tile.to_stamp_mode()
+
 
     
 class DeleteStampButton(Button):
@@ -1001,6 +1090,7 @@ class DeleteStampButton(Button):
         ## Also hides the fact that the UI still displays the to-be-deleted stamp, lol
         root.current = "game_screen"
         Tile.to_draw_mode()
+
 
 
 class StampThumbnail(TileGrid):
@@ -1077,6 +1167,7 @@ class StampList(ListView):
                                    cls = ViewStampButton)
 
         self.adapter = dict_adapter
+
 
 
 class StampViewer(GridLayout):
@@ -1168,13 +1259,15 @@ class StampViewer(GridLayout):
             print
 
 
+
 class NameBox(TextInput):
     def __init__(self, **kwargs):
         super(NameBox, self).__init__(**kwargs)
         self.font_size = 50
         self.size_hint_y = 0.3
         self.text = "New Stamp"
-        
+
+
 
 class SaveNameButton(Button):
     def __init__(self, **kwargs):
@@ -1213,6 +1306,8 @@ class SaveNameButton(Button):
         self.append_stamp_to_file("gameoflifestamps.txt", self.stamp_name, self.stamp_grid)
         root.current = "game_screen"
 
+
+
 class CancelButton(Button):
     def __init__(self, **kwargs):
         super(CancelButton, self).__init__(**kwargs)
@@ -1222,6 +1317,7 @@ class CancelButton(Button):
 
     def on_release(self):
         root.current = "game_screen"
+
 
 
 ## Just a screen
@@ -1239,7 +1335,8 @@ class SaveStampScreen(Screen):
            nameSaver.add_widget(CancelButton())
            self.add_widget(nameSaver)
            self.already_set_up = True
-    
+
+
 
 class AboutMeScreen(Screen):
     def __init__(self, **kwargs):
@@ -1247,9 +1344,11 @@ class AboutMeScreen(Screen):
         self.name = "about_me_screen"
 
 
+
 if __name__ == "__main__":
     try:
         os.remove("gameoflife.ini")
     except:
         pass
+    
     GameOfLifeApp().run()

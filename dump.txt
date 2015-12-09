@@ -1,0 +1,130 @@
+
+class ___PenButton(Button):
+    def __init__(self, **kwargs):
+        super(PenButton, self).__init__(**kwargs)
+        self.text = "Pen"
+        self.font_size = 20
+
+    def on_release(self):
+        Tile.to_draw_mode()
+
+class ___StampButton(Button):
+    def __init__(self, **kwargs):
+        super(StampButton, self).__init__(**kwargs)
+        self.text = "Stamp"
+        self.font_size = 20
+
+    def on_release(self):
+        Tile.to_stamp_mode()
+
+class ___ChooseStampButton(Button):
+    def __init__(self, **kwargs):
+        super(ChooseStampButton, self).__init__(**kwargs)
+        self.text = "Choose Stamp"
+        self.font_size = 20
+
+    def on_release(self):
+        root.ids["grid"].stop()
+        root.ids["play_pause_button"].stop()
+        root.current = "stamp_screen"
+
+class ___SettingsButton(Button):
+    def __init__(self, **kwargs):
+        super(SettingsButton, self).__init__(**kwargs)
+        self.text = "Settings"
+        self.font_size = 20
+
+    def on_release(self):
+        root.ids["play_pause_button"].stop()
+        root.ids["grid"].stop()
+
+
+
+
+
+
+
+class ___PlayPauseButton(Button):
+    def __init__(self, **kwargs):
+        super(PlayPauseButton, self).__init__(**kwargs)
+        self.text = "Play"
+        self.font_size = 20
+        self.playing = False
+
+    def stop(self):
+        self.text = "Play"
+        self.playing = False
+
+    def on_release(self):
+        if not self.playing:
+            root.ids["grid"].save_state()
+        
+        if not self.playing:
+            self.playing = True
+            self.text = "Stop"
+        else:
+            self.playing = False
+            self.text = "Play"
+            
+        root.ids["grid"].toggle()
+
+
+class ____NextButton(Button):
+    def __init__(self, **kwargs):
+        super(NextButton, self).__init__(**kwargs)
+        self.text = "Next"
+        self.font_size = 20
+
+    def on_release(self):
+        root.ids["grid"].update_board()
+        print "width:", Window.width
+        print "height:", Window.height
+
+class ___RestoreButton(Button):
+    def __init__(self, **kwargs):
+        super(RestoreButton, self).__init__(**kwargs)
+        self.text = "Restore"
+        self.font_size = 20
+
+    def on_release(self):
+        root.ids["grid"].load_initial_state()
+
+
+class ___SaveButton(Button):
+    def __init__(self, **kwargs):
+        super(SaveButton, self).__init__(**kwargs)
+        self.text = "Save"
+        self.font_size = 20
+
+    def on_release(self):
+        root.ids["grid"].stop()
+        root.ids["play_pause_button"].stop()
+        root.ids["grid"].record_stamp()
+        if root.ids["grid"].stamp == None:
+            return
+        root.current = "save_stamp_screen"
+
+
+class ___ClearButton(Button):
+    def __init__(self, **kwargs):
+        super(ClearButton, self).__init__(**kwargs)
+        self.text = "Clear"
+        self.font_size = 20
+
+    def on_release(self):
+        root.ids["grid"].clear_board()
+        root.ids["grid"].stop()
+        root.ids["play_pause_button"].stop()
+        print root.ids["grid"].tiles
+        print len(root.ids["grid"].children)
+
+
+class ___RandomButton(Button):
+    def __init__(self, **kwargs):
+        super(RandomButton, self).__init__(**kwargs)
+        self.text = "Random"
+        self.font_size = 20
+    def on_release(self):
+        root.ids["play_pause_button"].stop()
+        root.ids["grid"].randomize()
+
