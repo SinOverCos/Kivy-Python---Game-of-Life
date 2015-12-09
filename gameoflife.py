@@ -20,7 +20,7 @@ from kivy.uix.textinput import TextInput # For saving stamps
 
 ## Settings panel
 from kivy.config import ConfigParser
-from kivy.uix.settings import SettingsWithSpinner
+from kivy.uix.settings import SettingsWithSidebar
 from gameoflifesettings import logic
 from gameoflifesettings import aesthetics
 from gameoflifesettings import about_me
@@ -910,7 +910,7 @@ class GameOfLifeApp(App):
         self.build_grid()
 
         ## Settings panel
-        self.settings_cls = SettingsWithSpinner
+        self.settings_cls = SettingsWithSidebar
         self.use_kivy_settings = False
 
         ## Make root accessible to all
@@ -1095,8 +1095,6 @@ class ReturnButton(Button):
     def on_release(self):
         root.current = "game_screen"
         root.ids["grid"].stamp = self.selection
-        print self.selection
-        Tile.to_stamp_mode()
 
 
 
