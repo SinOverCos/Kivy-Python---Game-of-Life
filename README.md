@@ -22,7 +22,7 @@ Premise of the game:
 Installation instructions:
 ==========================
 
-The packaged version on OS X is 1.1GB and isn't really practical to put on GitHub, since part of its bulk include python interpreters and such so that the app can work out of the box.
+The packaged version on OS X is 1.1GB and isn't really practical to put on GitHub, since part of its bulk include a python interpreter and such so that the app can work out of the box.
 
 The safest route would be to follow instructions [here](http://kivy.org/docs/installation/installation.html).
 
