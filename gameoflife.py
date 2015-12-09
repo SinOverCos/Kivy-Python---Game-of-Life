@@ -32,10 +32,6 @@ import os
 
 # TODO:
 
-# Document the code
-
-# Separate into modules? E.g. # from buttons import *
-
 # Dynamic word sizes - physical word sizes change depending on screen resolution
 
 # Package for OS X and Windows
