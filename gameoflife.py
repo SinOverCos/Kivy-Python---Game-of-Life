@@ -40,7 +40,9 @@ import os
 
 # Package for OS X and Windows
 
-# Package for Android - upgrade android sdk from VM
+# upgrade android sdk from VM and try to build again!
+# upgrade android sdk from VM and try to build again!
+# Package for Android - upgrade android sdk from VM and try to build again!
 # Package for iOS
 
 
@@ -107,7 +109,7 @@ import os
 #   then the game should know the touch started from a button and should not react
 
 
-
+## Settings the screen to a big size
 PY_WIDTH = 1600
 PY_HEIGHT = 1200
 
@@ -121,6 +123,7 @@ Window.size = (int(0.5*PY_WIDTH), int(0.5*PY_HEIGHT))
 
 
 
+## Updates the bounds of a widget
 def get_bounds(bounded):
     bounded.left = bounded.pos[0]
     bounded.right = bounded.pos[0] + bounded.size[0]
@@ -129,6 +132,7 @@ def get_bounds(bounded):
 
 
 
+## Master widget, it juggles between the different screens
 class Juggler(ScreenManager):
     def __init__(self, **kwargs):
         super(Juggler, self).__init__(**kwargs)
@@ -139,32 +143,27 @@ class Juggler(ScreenManager):
 
 
 
+## Primary screen holding the menu options and grid
 class GameScreen(Screen):
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
         self.name = "game_screen"
 
-    def on_pre_enter(self):        
-        print Window.height
-        print Window.width
 
 
-
+## Holds the top and bottom menu bars plus the game screen
 class MasterBox(FloatLayout):
     def __init__(self, **kwargs):
         super(MasterBox, self).__init__(**kwargs)        
 
 
 
+## Holds all the individual tiles
 class TileGrid(GridLayout):
     def __init__(self, **kwargs):
         super(TileGrid, self).__init__(**kwargs)
 
         self.side_len = 20
-        print "self.side_len:", self.side_len, ", PY_HEIGHT:", PY_HEIGHT, "GRID_SCALE*PY_HEIGHT:", GRID_SCALE*PY_HEIGHT,
-        print ", GRID_SCALE*PY_HEIGHT/self.side_len", int(GRID_SCALE*PY_HEIGHT/self.side_len)
-        print "self.side_len:", self.side_len, ", PY_WIDTH:", PY_WIDTH,
-        print ", PY_WIDTH/self.side_len", PY_WIDTH/self.side_len
         self.rows = int((GRID_SCALE)*PY_HEIGHT/self.side_len) ## GRID_SCALE is proportion of screen height used for grid
         self.cols = PY_WIDTH/self.side_len
         self.tiles = self.rows*self.cols
@@ -180,6 +179,7 @@ class TileGrid(GridLayout):
 
         self.stamp = None
 
+    ## Adds appropriate number of tiles to itself
     def build_self(self):
         for i in range(self.tiles):
             self.add_widget(Tile(self.tiles - i - 1))
@@ -190,10 +190,12 @@ class TileGrid(GridLayout):
         self.cols = Window.width/self.side_len
         self.tiles = self.rows*self.cols
 
+    ## Kills all the tiles
     def clear_board(self):
         for child in self.children:
             child.die()
 
+    ## Scrambles the tiles
     def randomize(self):
         self.stop()
         for child in self.children:
@@ -201,16 +203,17 @@ class TileGrid(GridLayout):
                 child.live()
             else:
                 child.die()
-        
-    # True for alive, False for dead, None for out of bounds
+
+    ## Determines the state of the cell at the specified coordinates
+    ## True for alive, False for dead, None for out of bounds
     def determine_state(self, row, col):
         if row < 0 or row >= self.rows or col < 0 or col >= self.cols:
             return None
         else:
             tile_num = row*self.cols + col
             return self.children[tile_num].alive
-    
-    # Return list of neighbour states
+
+    ## Return list of neighbour states
     def find_neighbour_states(self, tile_num):
         # Coordinates are in row, col
         tile_coords = [tile_num/self.cols, tile_num%self.cols]
@@ -245,6 +248,7 @@ class TileGrid(GridLayout):
 
         return state_list
 
+    ## Counts the number of living neighbours a tile has
     def number_alive(self, tile_num):
         neighbour_states = self.find_neighbour_states(tile_num)
         living_neighbours = 0
@@ -255,6 +259,7 @@ class TileGrid(GridLayout):
 
         return living_neighbours
 
+    ## Determines the next state of the board (who lives, who dies)
     def get_life_list(self):
         next_frame = []
         for child in self.children:
@@ -272,7 +277,8 @@ class TileGrid(GridLayout):
 
         return next_frame
 
-    ## *args needed - Clock will pass what I assume is time
+    ## Updates the board using the list returned by get_life_list()
+    ## *args needed - Clock will pass additional arguments (interval?)
     def update_board(self, *args):
         next_frame = self.get_life_list()
         for i, j in zip(next_frame, self.children):
@@ -281,6 +287,7 @@ class TileGrid(GridLayout):
             else:
                 j.die()
 
+    ## Toggles the state of the board - switches between constantly updating the board and stopping
     def toggle(self):
         if not self.playing:
             self.running = Clock.schedule_interval(self.update_board, 1.0/self.updates_per_second)
@@ -290,17 +297,21 @@ class TileGrid(GridLayout):
             self.running = None
             self.playing = False
 
+    ## Stops updating the board
     def stop(self):
         if self.running != None:
             Clock.unschedule(self.running)
             self.running = None
             self.playing = False
 
+    ## Saves the state of the board
+    ## Called before the board starts animating in case the user wants to restart
     def save_state(self):
         self.initial_state = []
         for child in self.children:
             self.initial_state.append(child.alive)
 
+    ## Stops the animation and restores the board to its initial state
     def load_initial_state(self):
         if self.initial_state == None:
             print "No initial state to go back to."
@@ -320,6 +331,7 @@ class TileGrid(GridLayout):
     ## Assumes the consecutive patterns are ascending
     ## A consecutive list is returned as-is
     def keep_outer_consecutives(self, seq):
+        ## Counting consecutives from the front
         beginning = []
         end = []
         head = seq[0]
@@ -372,13 +384,11 @@ class TileGrid(GridLayout):
             self.stamp = None
             return
         
-        ## print "The whole board, up-down, left-right flipped:"
-        ## self.print_binary_matrix(state_matrix)
-        
         ## Trim rows with all dead tiles
-        dead_rows = []
-        dead_row = []
+        dead_rows = [] # Holds the indices of the dead rows in state_matrix
+        dead_row = [] # Definition of a dead row
 
+        ## Defining a row of all dead tiles
         for i in range(self.cols):
             dead_row.append(False)
 
@@ -388,7 +398,7 @@ class TileGrid(GridLayout):
 
         ## Keep inner empty rows (they are intentional)
         dead_rows = self.keep_outer_consecutives(dead_rows)
-        ## Reverse order so they can be removed
+        ## Reverse order so they can be removed safely (not removing elements as I iterate forward)
         dead_rows = dead_rows[::-1]
         ## print "Dead rows to remove, in this order:", dead_rows
         for row in dead_rows:
@@ -422,12 +432,15 @@ class TileGrid(GridLayout):
 
         self.stamp = state_matrix
 
+    ## If the given state is True, make the tile at the given coordinates live
+    ## Used to help with paste_stamp()
     def enforce_life(self, row, col, state):
 
         ## If out of bounds, do nothing
         if row < 0 or row >= self.rows or col < 0 or col >= self.cols:
             return
 
+        ## If trying to enforce death, skip
         if state == False:
             return
         
@@ -441,6 +454,7 @@ class TileGrid(GridLayout):
             print "There is no stamp to paste."
             return
 
+        ## Find the middle coordinate
         stamp_rows = len(stamp)
         stamp_cols = len(stamp[0])
         mid_row = midpoint/self.cols
@@ -452,25 +466,21 @@ class TileGrid(GridLayout):
         if least_col < 0:
             least_col = 0
 
-        print "stamp rows:", stamp_rows, "stamp cols:", stamp_cols
-        print "mid row:", mid_row, "mid_col:", mid_col
-        print "least_row:", least_row, "least_col:", least_col
-
+        ## Paste each of the stamp's tiles onto the board
         for r in range(stamp_rows):
             for c in range(stamp_cols):
                 self.enforce_life(least_row + r, least_col + c, stamp[r][c])
 
+    ## Letters are possible inputs, so non-numeric characters are filtered out
+    ## If the remaining string is a valid number, the tile size is updated to that size
     def update_tile_size(self, new_tile_size):
-        print new_tile_size
+        ## Filter out non-numeric characters
         new_tile_size = str(new_tile_size)
         clean_number = ""
         str_numbers = ['.', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
         for char in new_tile_size:
             if char in str_numbers:
                 clean_number += char
-
-        print "NEW TILE SIZE:" + clean_number
-        print int(clean_number)
 
         try:
             ## Try statement in case no user enters no numeric character
@@ -487,8 +497,7 @@ class TileGrid(GridLayout):
         self.side_len = new_tile_size
         self.update_rct()
         Tile.side_len = new_tile_size
-        Tile.update_rc()
-
+        
         self.build_self()
         
         # Any saved state would be invalid now
@@ -496,6 +505,7 @@ class TileGrid(GridLayout):
 
 
 
+## Base class for the picture buttons
 class ImageButton(Image):
     def __init__(self, **kwargs):
         super(ImageButton, self).__init__(**kwargs)
@@ -507,11 +517,14 @@ class ImageButton(Image):
         ##  but self.top just feels so much cleaner
         get_bounds(self)
 
+    ## If the touch is within this widget's bounds, the touch_down image is displayed, instead
     def on_touch_down(self, touch):
         get_bounds(self)
         if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
             self.source = self.down_source
 
+    ## If the touch movement is within this widget's bounds, the down_source is applied
+    ## Otherwise the up_source is applied
     def on_touch_move(self, touch):
         if (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
             self.source = self.down_source
@@ -519,7 +532,7 @@ class ImageButton(Image):
             self.source = self.up_source
 
 
- 
+## Switches the game to draw mode
 class PenButton(ImageButton):
     def __init__(self, **kwargs):
         super(PenButton, self).__init__(**kwargs)
@@ -533,7 +546,8 @@ class PenButton(ImageButton):
             Tile.to_draw_mode()
 
 
-        
+
+## Switches the game to stamp mode
 class StampButton(ImageButton):
     def __init__(self, **kwargs):
         super(StampButton, self).__init__(**kwargs)
@@ -548,6 +562,7 @@ class StampButton(ImageButton):
 
 
 
+## Swaps the game to the choose stamp screen
 class ChooseStampButton(ImageButton):
     def __init__(self, **kwargs):
         super(ChooseStampButton, self).__init__(**kwargs)
@@ -564,6 +579,7 @@ class ChooseStampButton(ImageButton):
 
 
 
+## Swaps the game to the settings screen
 class SettingsButton(ImageButton):
     def __init__(self, **kwargs):
         super(SettingsButton, self).__init__(**kwargs)
@@ -581,6 +597,8 @@ class SettingsButton(ImageButton):
 
 
 
+## Swaps the game between playing and stopping the animation
+## on_touch_down and on_touch_move are overridden because this button has two images
 class PlayPauseButton(ImageButton):
     def __init__(self, **kwargs):
         super(PlayPauseButton, self).__init__(**kwargs)
@@ -628,6 +646,7 @@ class PlayPauseButton(ImageButton):
 
 
 
+## Stops the animation, if any, and goes to the next frame
 class NextButton(ImageButton):
     def __init__(self, **kwargs):
         super(NextButton, self).__init__(**kwargs)
@@ -645,6 +664,7 @@ class NextButton(ImageButton):
 
 
 
+## Stops the animation, if any, and restores the grid to its original state
 class RestoreButton(ImageButton):
     def __init__(self, **kwargs):
         super(RestoreButton, self).__init__(**kwargs)
@@ -660,6 +680,8 @@ class RestoreButton(ImageButton):
 
 
 
+## Saves the board's current state and takes the user to the save stamp screen
+## Does nothing if the board is empty
 class SaveButton(ImageButton):
     def __init__(self, **kwargs):
         super(SaveButton, self).__init__(**kwargs)
@@ -681,6 +703,7 @@ class SaveButton(ImageButton):
 
 
 
+## Scrambles the tiles
 class RandomButton(ImageButton):
     def __init__(self, **kwargs):
         super(RandomButton, self).__init__(**kwargs)
@@ -697,6 +720,7 @@ class RandomButton(ImageButton):
 
 
 
+## Clears the tiles
 class ClearButton(ImageButton):
     def __init__(self, **kwargs):
         super(ClearButton, self).__init__(**kwargs)
@@ -717,7 +741,7 @@ class ClearButton(ImageButton):
 # Touch: parent receives signal. If return False (default), then pass to
 # most recently added child, then second most recent, etc.
 # Root widget receives touch first
-
+## Class representing tiles in the game
 class Tile(Image):
 
     live_source = "./Images/GreenFade.png"
@@ -735,22 +759,8 @@ class Tile(Image):
 
         self.index = index
 
-        ## In retrospect, keeping row and cols in the Tile was useless,
-        ##  and trying to keep it updated with the grid's numbers was a pain
-        ##self.row_num = index/Tile.cols
-        ##self.col_num = index%Tile.cols
-
         self.alive = False
         self.departed = True
-
-    ## Update rows and cols after side_len has changed
-    @staticmethod
-    def update_rc():
-        ## In retrospect, keeping row and cols in the Tile was useless,
-        ##  and trying to keep it updated with the grid's numbers was a pain
-        ##Tile.rows = int(GRID_SCALE*Window.height/Tile.side_len)
-        ##Tile.cols = Window.width/Tile.side_len
-        pass
     
     ## Changes tile behaviour to draw mode
     @staticmethod
@@ -761,9 +771,6 @@ class Tile(Image):
     @staticmethod
     def to_stamp_mode():
         Tile.draw_mode = False
-
-    def print_bounds(self):
-        print self.left, self.right, self.bottom, self.top
 
     ## Enforces that this tile uses the live source
     ## If already alive, don't bother reassigning the source
@@ -781,6 +788,7 @@ class Tile(Image):
         self.alive = False
         self.source = Tile.dead_source
 
+    # self.departed: true if the touch has left this tile.
     def on_touch_down(self, touch):
 
         get_bounds(self)
@@ -800,7 +808,6 @@ class Tile(Image):
             ## Either way, departed is now False
             self.departed = False
 
-    # self.departed: true if the touch has left this tile.
     # Status should only be updated if the user is returning (i.e. departed, then came back)
     # Should not continuously shift back and forth because user's finger stayed too long
     def on_touch_move(self, touch):
@@ -808,7 +815,7 @@ class Tile(Image):
         get_bounds(self)
 
         ## If coming back to this tile and in draw mode:
-        if self.departed and Tile.draw_mode == True and (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
+        if self.departed and Tile.draw_mode and (self.left <= touch.x <= self.right) and (self.bottom <= touch.y <= self.top):
             if self.alive == True:
                 self.die()
             else:
@@ -820,6 +827,9 @@ class Tile(Image):
         if (not (self.left <= touch.x <= self.right)) or (not (self.bottom <= touch.y <= self.top)):
             self.departed = True
 
+        ## No consideration for stamps because user shouldn't be able to accidentally
+        ##  paste the same stamp mutiple times next to each other (ruins the stamp)
+
     def on_touch_up(self, touch):
 
         get_bounds(self)
@@ -830,6 +840,7 @@ class Tile(Image):
 
         
 
+## The app itself
 class GameOfLifeApp(App):
 
     def __init__(self, **kwargs):
@@ -855,6 +866,7 @@ class GameOfLifeApp(App):
         global app
         app = self
 
+    ## Takes a file name and updates the rules dictionary with definitions from the file
     def read_rules_from_file(self, filename):
         rules = {}
         rule_file = open(filename, "r")
@@ -877,6 +889,7 @@ class GameOfLifeApp(App):
 
         return rules
 
+    ## Takes a file name and updates the tiles dictionary with paths from the file
     def read_tiles_from_file(self, filename):
         tiles = {}
         tile_file = open(filename, "r")
@@ -885,9 +898,11 @@ class GameOfLifeApp(App):
             tiles[tile[0]] = tile[1][:-1] ## Get rid of the newline character at the end
         return tiles
 
+    ## Calls the grid's build_self function
     def build_grid(self):
         self.grid.build_self()
-    
+
+    ## Sets everything up
     def build(self):
         self.root = Juggler()
         self.grid = self.root.children[0].children[0].children[2].children[0].children[0]
@@ -896,13 +911,14 @@ class GameOfLifeApp(App):
 
         ## Settings panel
         self.settings_cls = SettingsWithSpinner
-        #self.use_kivy_settings = False
+        self.use_kivy_settings = False
 
         ## Make root accessible to all
         global root
         root = self.root
         return self.root
 
+    ## Sets up default settings in the settings panel
     def build_config(self, config):
         config.setdefaults("logic", {
             "updates_per_second" : 10,
@@ -917,20 +933,25 @@ class GameOfLifeApp(App):
             "custom_live_tile" : "/",
             "custom_dead_tile" : "/"})
 
+    ## Adds the two settings panels
     def build_settings(self, settings):
         settings.add_json_panel("Gameplay", self.config, data=logic)
         settings.add_json_panel("Aesthetics", self.config, data=aesthetics)
 
+    ## Calls corresponding function to the setting that is changed
     def on_config_change(self, config, section, key, value):
         self.settings_functions.get(key, self.setting_not_found)(config, value)
 
+    ## Should never be called, but here in case
     def setting_not_found(self, value, *args):
         print "Can't do anything about %s, setting not found!" % str(value)
 
+    ## Changes the update frequency
     def update_updates_per_second(self, config, new_updates_per_second):
         new_updates_per_second = float(new_updates_per_second)
         self.grid.updates_per_second = new_updates_per_second
 
+    ## Converts string input to individual digits
     def to_single_digits(self, single_digits):
         string = str(single_digits)
         str_numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '0']
@@ -941,9 +962,9 @@ class GameOfLifeApp(App):
                 new_numbers.append(int(char))
         return new_numbers
 
+    ## Updates the requirement to living
     def update_req_to_live(self, config, new_req_to_live):
         new_numbers = self.to_single_digits(new_req_to_live)
-        print "New list of allowable neighbours to stay alive: ", new_numbers
         self.grid.req_to_live = new_numbers
         
         new_live_str = ""
@@ -951,24 +972,28 @@ class GameOfLifeApp(App):
             new_live_str += str(char)
             new_live_str += ", "
         new_live_str = new_live_str[:-2]
-               
+
+    ## Updates the requirement to come alive
     def update_req_to_birth(self, config, new_req_to_birth):
         new_numbers = self.to_single_digits(new_req_to_birth)
         print "New list of neighbours needed to come to live: ", new_numbers
         self.grid.req_to_birth = new_numbers
 
+    ## Updates the set of rules to use, e.g. Conway is 2, 3 to live, 3 to come alive
     def update_rule_to_use(self, config, new_rule_to_use):
         new_rule_set = self.rules[new_rule_to_use]
         self.update_req_to_live(config, new_rule_set[0])
         self.update_req_to_birth(config, new_rule_set[1])
 
+    ## Updates live tile with new picture
     def update_live_tile(self, config, new_live_tile):
         Tile.live_source = self.tiles[str(new_live_tile)]
         print "Tile.live_source is updated to: ", Tile.live_source
         for child in self.root.ids["grid"].children:
             if child.alive:
                 child.source = Tile.live_source
-    
+
+    ## Updates dead tile with new picture    
     def update_dead_tile(self, config, new_dead_tile):
         Tile.dead_source = self.tiles[str(new_dead_tile)]
         print "Tile.dead_source is updated to: ", Tile.dead_source
@@ -985,6 +1010,7 @@ class GameOfLifeApp(App):
     def update_background(self, config, new_background):
         pass
 
+    ## Updates the live tile with a custom image (path specified by the user)
     def update_custom_live_tile(self, config, new_live_tile):
         new_path = str(new_live_tile)
         print "New path for live tiles: ", new_path
@@ -993,6 +1019,7 @@ class GameOfLifeApp(App):
             if child.alive:
                 child.source = new_path
 
+    ## Updates the dead tile with a custom image (path specified by the user)
     def update_custom_dead_tile(self, config, new_dead_tile):
         new_path = str(new_dead_tile)
         print "New path for dead tiles: ", new_path
@@ -1007,22 +1034,23 @@ class GameOfLifeApp(App):
 
 
 
-## Just a screen
+## Screen for selecting stamps
 class StampScreen(Screen):
     def __init__(self, **kwargs):
         super(StampScreen, self).__init__(**kwargs)
         self.name = "stamp_screen"
         self.tile_side_len = None
 
+    ## Tracks the original Tile settings (they are changed later for the stamp previews)
     def on_pre_enter(self):
         self.children[0].list_stamps()
         self.orig_tile_side_len = Tile.side_len
         self.orig_tile_mode = Tile.draw_mode
         Tile.to_draw_mode()
 
+    ## Changes Tile settings to the screen's pre-enter state
     def on_pre_leave(self):
         Tile.side_len = self.orig_tile_side_len
-        Tile.update_rc()
         if self.orig_tile_mode == True:
             Tile.to_draw_mode()
         else:
@@ -1031,11 +1059,14 @@ class StampScreen(Screen):
 
 
 
+## Custom button to use for selectable scrollview
 class ViewStampButton(ListItemButton):
     def __init__(self, **kwargs):
         super(ViewStampButton, self).__init__(**kwargs)
         self.font_size = 20
 
+    ## When this button is clicked, the stamp that this button represents will be
+    ##  put up on the preview
     def on_release(self):
         stamp_dict = root.ids["stamp_select_viewer"].children[0].stamp_dict
         returnDeleteButtons = root.ids["stamp_select_viewer"].children[1]
@@ -1052,6 +1083,7 @@ class ViewStampButton(ListItemButton):
 
 
 
+## Button to return to the game screen
 class ReturnButton(Button):
     def __init__(self, **kwargs):
         super(ReturnButton, self).__init__(**kwargs)
@@ -1067,7 +1099,8 @@ class ReturnButton(Button):
         Tile.to_stamp_mode()
 
 
-    
+
+## Button to delete a stamp    
 class DeleteStampButton(Button):
     def __init__(self, **kwargs):
         super(DeleteStampButton, self).__init__(**kwargs)
@@ -1087,12 +1120,14 @@ class DeleteStampButton(Button):
         ## Hack. The list view dictionary turns to None after one deletion
         ## Not sure how that works in kivy (or if I'm doing something wrong)
         ## For now: return user to screen after one deletion
-        ## Also hides the fact that the UI still displays the to-be-deleted stamp, lol
+        ## Also hides the fact that the UI still displays the to-be-deleted stamp
+        ##  and will only update the next time the user enters this screen, lol
         root.current = "game_screen"
         Tile.to_draw_mode()
 
 
 
+## A smaller grid that is just big enough to display the stamp selected in the stamp screen
 class StampThumbnail(TileGrid):
     def __init__(self, rows, cols, live, birth, stamp, **kwargs):
         super(StampThumbnail, self).__init__(**kwargs)
@@ -1121,24 +1156,28 @@ class StampThumbnail(TileGrid):
 
         self.build_self()
 
+    ## Updates the grid according the to tile sizes (changes with each stamp)
     def update_rct(self):
         self.rows = int(0.4*Window.height/self.side_len) ## 0.4 is scale of the demo grid
         self.cols = Window.width/self.side_len
         self.tiles = self.rows*self.cols
 
+    ## Reconfigures the grid to fit the current stamp
+    ## Line to start the animation (preview the stamp's animation before selecting it)
+    ##  is disabled. Not sure if user would want to only see what the initial stamp looks like
+    ## In addition, depending on the stamp, the size of the grid would have to be adjusted
+    ##  to accomodate for the full size of the resulting animation, which is impossible to
+    ##  determine for an arbitrary pattern, according to Conway himself!
     def start_demo(self):
         ## Stop previous animation (if any)
         self.stop()
         ## Resize tiles so grid matches pattern
-        print "Cells are stretched this way. Reconfigure and use paste_stamp()"
         self.stamp_rows = len(self.stamp)
         self.stamp_cols = len(self.stamp[0])
         self.side_len = min((0.4*Window.height)/(1.3*self.stamp_rows),
                             (Window.width)/(1.3*self.stamp_cols))
-        print "New side length from preview: ", self.side_len
         self.update_tile_size(str(int(self.side_len)))
         ## Paste pattern into middle
-        print "Pasting stamp. self.tiles/2: ", self.tiles/2
         self.paste_stamp(self.tiles/2, self.stamp)
 
         ## Start animation
@@ -1146,6 +1185,9 @@ class StampThumbnail(TileGrid):
         
 
 
+## A scrollable list view with clickable buttons
+## This is mostly copy-pasted code from kivy examples
+## I still don't quite understand how this list things works
 class StampList(ListView):
     def __init__(self, stamp_dict, **kwargs):
         super(StampList, self).__init__(**kwargs)
@@ -1170,18 +1212,21 @@ class StampList(ListView):
 
 
 
+## A smaller grid used to preview stamps
 class StampViewer(GridLayout):
     ## Will be called by .kv at app start because it's in the widget tree
     def __init__(self, **kwargs):
-        kwargs['cols'] = 1 # One column of buttons, has to come before super()
+        kwargs['cols'] = 1 # One column of buttons, has to come before super(), don't know why
         super(StampViewer, self).__init__(**kwargs)
         self.orientation = "vertical"
         
-        ## Here for testing only, replace with real dictionary
-        ## from the read_stamps_from_file() method
         self.stamp_dict = {}
         self.already_set_up = False
 
+
+    ## For whatever reason, most of this setup work can't be done in __init__()
+    ## My guess is that there'a conflict when the .kv file's tree is constructed
+    ##  at the same time that the __init__() method is running, but not sure
     def list_stamps(self):
         ## Initiate the preview
         ## Reread every time in case user added new stamp and is trying it out
@@ -1194,7 +1239,8 @@ class StampViewer(GridLayout):
         self.add_widget(Buttons)
         self.add_widget(StampList(self.stamp_dict))
         self.already_set_up = True
-        
+
+    ## Reads stamps and their definitions from file
     def read_stamps_from_file(self, stamp_file):
         stamps = open(stamp_file, "r")
 
@@ -1249,17 +1295,9 @@ class StampViewer(GridLayout):
 
         self.stamp_dict = None
 
-    def print_binary_matrix(self, matrix):
-        for row in matrix:
-            for col in row:
-                if col:
-                    print "1",
-                else:
-                    print "0",
-            print
 
 
-
+## Simple text input for saving stamp names
 class NameBox(TextInput):
     def __init__(self, **kwargs):
         super(NameBox, self).__init__(**kwargs)
@@ -1269,6 +1307,7 @@ class NameBox(TextInput):
 
 
 
+## Saves a stamp with the text in the text input as its name
 class SaveNameButton(Button):
     def __init__(self, **kwargs):
         super(SaveNameButton, self).__init__(**kwargs)
@@ -1280,9 +1319,6 @@ class SaveNameButton(Button):
 
     def append_stamp_to_file(self, stamp_file, stamp_name, stamp_matrix):
         stamps = open(stamp_file, "a")
-
-        print "Saving stamp to file:", stamp_name
-        
 
         line = stamp_name + ":"
         for row in stamp_matrix:
@@ -1300,7 +1336,6 @@ class SaveNameButton(Button):
         stamps.close()
         
     def on_release(self):
-        print "Implement save to file"
         self.stamp_name = root.ids["save_stamp_screen"].children[0].children[2].text
         self.stamp_grid = root.ids["grid"].stamp
         self.append_stamp_to_file("gameoflifestamps.txt", self.stamp_name, self.stamp_grid)
@@ -1308,6 +1343,7 @@ class SaveNameButton(Button):
 
 
 
+## Returns the user to the main game screen without saving the stamp
 class CancelButton(Button):
     def __init__(self, **kwargs):
         super(CancelButton, self).__init__(**kwargs)
@@ -1320,7 +1356,7 @@ class CancelButton(Button):
 
 
 
-## Just a screen
+## Screen used to save stamps - consists of a text input and two buttons
 class SaveStampScreen(Screen):
     def __init__(self, **kwargs):
         super(SaveStampScreen, self).__init__(**kwargs)
@@ -1338,6 +1374,7 @@ class SaveStampScreen(Screen):
 
 
 
+## Not implemented yet
 class AboutMeScreen(Screen):
     def __init__(self, **kwargs):
         super(AboutMeScreen, self).__init__(**kwargs)
@@ -1346,6 +1383,7 @@ class AboutMeScreen(Screen):
 
 
 if __name__ == "__main__":
+    ## Hack/hotfix/ugly patch. See comments at the top
     try:
         os.remove("gameoflife.ini")
     except:
