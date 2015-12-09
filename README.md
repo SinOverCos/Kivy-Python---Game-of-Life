@@ -1,7 +1,7 @@
-# GUIPython
+# Game of Life
 First GUI project, implemented Conway's Game of Life with Kivy.
 
-Premise of the game:
+Premise of the Game:
 ====================
 
 **Basic premise of the game:**
@@ -19,7 +19,7 @@ Premise of the game:
 - The board can be scrambled
 - User-defined patterns can be saved
 
-Installation instructions:
+Installation Instructions:
 ==========================
 
 The packaged version on OS X is 1.1GB and isn't really practical to put on GitHub, since part of its bulk include a python interpreter and such so that the app can work out of the box.
@@ -37,7 +37,7 @@ The safest route would be to follow instructions [here](http://kivy.org/docs/ins
 **Finally:**
 - ```kivy gameoflife.py```
 
-Some issues encountered along the way:
+Some Issues Encountered Along the Way:
 ======================================
 
 - Read the comments at the top of gameoflife.py for more detail.
