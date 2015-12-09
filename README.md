@@ -42,6 +42,8 @@ Some issues encountered along the way:
 
 - Read the comments at the top of gameoflife.py for more detail.
 
+- Number one issue: I did not separate this project into different modules from the beginning. It's too late to un-clutter all my classes into different files now.
+
 - Kivy's widget tree is constructed at the beginning, but can't rely on the whole tree to exist when trying to initialize other widgets though ```__init__()```. Sometimes there will be conflicts where an ```__init__()``` constructor is expecting something to be there but it's not constructed by the widget tree yet.
 
 - The dictionary holding the list of stamps becomes None after an item is popped, don't know why.
