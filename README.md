@@ -26,6 +26,8 @@ The packaged version on OS X is 1.1GB and isn't really practical to put on GitHu
 
 The safest route would be to follow instructions [here](http://kivy.org/docs/installation/installation.html).
 
+**Python 2.7 is required.**
+
 **OS X Instructions:**
 - ```brew install Caskroom/cask/kivy```
 - ```sudo pip install cython```
