@@ -31,11 +31,13 @@ The safest route would be to follow instructions [here](http://kivy.org/docs/ins
 **OS X Instructions:**
 - ```brew install Caskroom/cask/kivy```
 - ```sudo pip install cython```
+- ```cd Kivy-Python---Game-of-Life```
 - ```kivy gameoflife.py```
 
 **Ubuntu / Other Linux Distros:**
 - ```sudo apt-get install python-kivy```
 - ```sudo pip install cython```
+- ```cd Kivy-Python---Game-of-Life```
 - ```python gameoflife.py```
 
 Some Issues Encountered Along the Way:
