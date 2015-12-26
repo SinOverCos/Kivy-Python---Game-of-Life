@@ -24,7 +24,7 @@ Installation Instructions:
 
 The packaged version on OS X is 1.1GB and isn't really practical to put on GitHub, since part of its bulk include a python interpreter and such so that the app can work out of the box.
 
-Kivy has installation instructions [here](http://kivy.org/docs/installation/installation.html) but I strongly recommend using the instructions below (using brew on Mac, and installing from the kivy repo on Ubuntu).
+Kivy has installation instructions [here](http://kivy.org/docs/installation/installation.html) but I strongly recommend using the instructions below (using brew on OS X, and installing from the kivy repo on Ubuntu).
 
 **Python 2.7 is required.**
 
