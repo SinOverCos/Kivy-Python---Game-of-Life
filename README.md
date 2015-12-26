@@ -29,16 +29,18 @@ The safest route would be to follow instructions [here](http://kivy.org/docs/ins
 **Python 2.7 is required.**
 
 **OS X Instructions:**
-- ```brew install Caskroom/cask/kivy```
 - ```sudo pip install cython```
+- ```brew install Caskroom/cask/kivy```
 - ```cd Kivy-Python---Game-of-Life```
 - ```kivy gameoflife.py```
 
 **Ubuntu / Other Linux Distros:**
+- ```sudo pip install cython==0.21.2```
+- ```sudo add-apt-repository ppa:kivy-team/kivy```
+- ```sudo apt-get update```
 - ```sudo apt-get install python-kivy```
-- ```sudo pip install cython```
 - ```cd Kivy-Python---Game-of-Life```
-- ```python gameoflife.py```
+- ```python2.7 gameoflife.py```
 
 Some Issues Encountered Along the Way:
 ======================================
