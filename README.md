@@ -45,7 +45,7 @@ Kivy has installation instructions [here](http://kivy.org/docs/installation/inst
 Some Issues Encountered Along the Way:
 ======================================
 
-- Read the comments at the top of gameoflife.py for more detail.
+- Comments at the top of gameoflife.py has more detail.
 
 - Number one issue: I did not separate this project into different modules from the beginning. It's too late to un-clutter all my classes into different files now.
 
