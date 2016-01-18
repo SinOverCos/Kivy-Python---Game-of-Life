@@ -43,6 +43,20 @@ Kivy has installation instructions [here](http://kivy.org/docs/installation/inst
 - ```cd Kivy-Python---Game-of-Life```
 - ```python2.7 gameoflife.py```
 
+
+Screenshots:
+============
+
+![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Repeater.gif?raw=true "Repeater")
+
+![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Settings1.png?raw=true "Settings")
+
+![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Settings2.gif?raw=true "Settings")
+
+![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Ship.png?raw=true "Ship")
+
+![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Stamps.png?raw=true "Stamps")
+
 Some Issues Encountered Along the Way:
 ======================================
 
