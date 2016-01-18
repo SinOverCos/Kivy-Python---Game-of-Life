@@ -1,5 +1,6 @@
 # Game of Life
 First GUI project, implemented Conway's Game of Life with Kivy.
+[Video](https://www.youtube.com/watch?v=1j7GlA-tXEo)
 
 Premise of the Game:
 ====================
