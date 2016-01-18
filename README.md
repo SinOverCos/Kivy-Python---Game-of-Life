@@ -51,7 +51,7 @@ Screenshots:
 
 ![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Settings1.png?raw=true "Settings")
 
-![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Settings2.gif?raw=true "Settings")
+![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Settings2.png?raw=true "Settings")
 
 ![Annotated](https://github.com/SinOverCos/Kivy-Python---Game-of-Life/blob/master/Ship.png?raw=true "Ship")
 
