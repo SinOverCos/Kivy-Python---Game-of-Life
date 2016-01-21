@@ -5,7 +5,7 @@ Conway's Game of Life:
 	[X] clear board
 	[X] speed
 	[X] zoom
-	[!] move around the board (may  need revision)
+	[ ] move around the board (may  need revision)
 	[X] stamps (e.g. glider gun)
 	[X] load previous settings or delete gameoflife.ini so settings are defaulted
 	[ ] about me page
