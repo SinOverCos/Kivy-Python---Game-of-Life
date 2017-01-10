@@ -37,7 +37,6 @@ import os
 # Package for OS X and Windows
 
 # upgrade android sdk from VM and try to build again!
-# upgrade android sdk from VM and try to build again!
 # Package for Android - upgrade android sdk from VM and try to build again!
 # Package for iOS
 
